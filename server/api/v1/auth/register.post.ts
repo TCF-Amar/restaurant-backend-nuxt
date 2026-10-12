@@ -1,4 +1,5 @@
 import z from "zod"
+import bcrypt from "bcryptjs"
 
 defineRouteMeta({
   openAPI: {
@@ -80,13 +81,15 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // TODO: Hash password before production storing (e.g. using argon2 / bcrypt)
+  // Hash password with bcrypt before storing
+  const hashedPassword = await bcrypt.hash(validatedData.password, 10)
+
   const user = await prisma.user.create({
     data: {
       name: validatedData.name,
       email: validatedData.email,
       phone: validatedData.phone || null,
-      password: validatedData.password,
+      password: hashedPassword,
     },
     select: {
       id: true,

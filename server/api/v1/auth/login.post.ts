@@ -1,4 +1,5 @@
 import z from "zod"
+import bcrypt from "bcryptjs"
 
 defineRouteMeta({
   openAPI: {
@@ -85,8 +86,31 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  // Compare password
-  if (!user || !user.password || user.password !== password) {
+  // Compare password using bcrypt
+  if (!user || !user.password) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Invalid credentials",
+    })
+  }
+
+  let isPasswordValid = false
+  if (user.password.startsWith("$2a$") || user.password.startsWith("$2b$")) {
+    isPasswordValid = await bcrypt.compare(password, user.password)
+  } else {
+    // Backwards compatibility for legacy plain text passwords + auto-upgrade to bcrypt
+    isPasswordValid = user.password === password
+    if (isPasswordValid) {
+      const upgradedHash = await bcrypt.hash(password, 10)
+      await prisma.user.update({
+        where: { id: user.id },
+        data: { password: upgradedHash },
+      })
+      console.info(`[Auth:Login] Upgraded plain-text password to bcrypt hash for user ${user.id}`)
+    }
+  }
+
+  if (!isPasswordValid) {
     throw createError({
       statusCode: 401,
       statusMessage: "Invalid credentials",
