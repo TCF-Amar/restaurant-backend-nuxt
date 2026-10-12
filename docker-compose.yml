@@ -1,0 +1,43 @@
+services:
+  postgres-db:
+    image: postgres:17-alpine
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+    # docker exec -it -e PGPASSWORD=postgres postgres-db psql -U postgres -d myapp_db
+
+
+  redis:
+    image: redis/redis-stack:latest
+    container_name: redis-stack
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+      - "8001:8001"
+    command: redis-stack-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "ping" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+      # docker exec -it -e REDIS_PASSWORD=password redis-stack redis-cli 
+      # docker exec -it -e REDIS_PASSWORD=password redis-stack redis-cli 
+
+volumes:
+  postgres_data: {}
+  redis_data: {}
