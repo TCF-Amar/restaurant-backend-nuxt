@@ -1,0 +1,21 @@
+{
+  "name": "projet-1",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "dependencies": {
+    "@tailwindcss/vite": "^4.3.3",
+    "nuxt": "^4.6.1",
+    "nuxt-icons": "4.0.0",
+    "nuxt-lucide-icons": "2.1.0",
+    "tailwindcss": "^4.3.3",
+    "vue": "^3.5.43",
+    "vue-router": "^5.4.0"
+  }
+}
