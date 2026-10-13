@@ -1,153 +1,183 @@
 <template>
-  <header class="sticky top-0 z-50 w-full border-b border-slate-800/80 bg-slate-950/80 backdrop-blur-md">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-16">
-        <!-- Logo & Brand -->
-        <div class="flex items-center gap-8">
-          <NuxtLink to="/" class="flex items-center gap-3 group">
-            <div
-              class="w-9 h-9 rounded-xl bg-gradient-to-tr from-indigo-600 via-indigo-500 to-purple-500 flex items-center justify-center shadow-lg shadow-indigo-500/20 group-hover:scale-105 transition-transform duration-200">
-              <svg class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+  <header class="fixed top-0 left-0 right-0 z-50 w-full glass-header select-none transition-colors">
+    <!-- Ambient top glow line -->
+    <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent"></div>
+
+    <div class="h-16 px-4 sm:px-6 flex items-center justify-between gap-4">
+      <!-- Left: Sidebar toggle + Brand -->
+      <div class="flex items-center gap-3">
+        <!-- Sidebar Toggle Button (Desktop & Mobile) -->
+        <button
+          @click="toggleSidebarAction"
+          type="button"
+          class="relative group p-2 rounded-xl text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 hover:border-indigo-500/40 transition-all duration-200 active:scale-95 cursor-pointer"
+          :title="isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'"
+        >
+          <LucidePanelLeftClose
+            v-if="!isCollapsed"
+            class="w-5 h-5 transition-transform group-hover:scale-105 text-indigo-300"
+          />
+          <LucidePanelLeftOpen
+            v-else
+            class="w-5 h-5 transition-transform group-hover:scale-105 text-slate-300"
+          />
+          <!-- Subtle glow ring on hover -->
+          <span class="absolute inset-0 rounded-xl bg-indigo-500/10 opacity-0 group-hover:opacity-100 transition-opacity blur-sm pointer-events-none"></span>
+        </button>
+
+        <!-- Brand / Logo -->
+        <NuxtLink to="/" class="flex items-center gap-2.5 group cursor-pointer">
+          <div class="relative w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 p-[1px] shadow-lg shadow-indigo-500/25 group-hover:shadow-indigo-500/40 transition-all duration-300">
+            <div class="w-full h-full rounded-[11px] bg-slate-950/90 backdrop-blur-md flex items-center justify-center">
+              <LucideSparkles class="w-4 h-4 text-indigo-400 group-hover:text-pink-300 transition-colors" />
             </div>
-            <div class="flex flex-col">
-              <span class="font-bold text-base tracking-tight text-white group-hover:text-indigo-300 transition-colors">
-                Projet
+            <!-- Glow backlight -->
+            <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 to-pink-500 rounded-xl blur-md opacity-30 group-hover:opacity-60 transition duration-300 pointer-events-none"></div>
+          </div>
+          <div class="flex flex-col">
+            <div class="flex items-center gap-1.5">
+              <span class="font-bold tracking-tight text-base text-white group-hover:text-indigo-200 transition-colors">
+                PROJET
               </span>
-              <span class="text-[10px] text-slate-400 uppercase tracking-widest font-medium">Dashboard</span>
+              <span class="text-[10px] font-medium tracking-wider uppercase px-1.5 py-0.5 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300">
+                PRO
+              </span>
             </div>
-          </NuxtLink>
+            <span class="text-[10px] text-slate-400 hidden sm:block">Glass Console</span>
+          </div>
+        </NuxtLink>
+      </div>
 
-          <!-- Desktop Navigation -->
-          <nav class="hidden md:flex items-center gap-1">
-            <NuxtLink to="/" class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors"
-              :class="route.path === '/' ? 'bg-slate-800/80 text-white font-semibold' : 'text-slate-400 hover:text-white hover:bg-slate-900/60'">
-              Dashboard
-            </NuxtLink>
-
-            <NuxtLink v-if="user?.role === 'ADMIN'" to="/admin"
-              class="px-3 py-1.5 rounded-lg text-sm font-medium transition-colors flex items-center gap-1.5"
-              :class="route.path.startsWith('/admin') ? 'bg-rose-500/10 text-rose-300 border border-rose-500/30 font-semibold' : 'text-slate-400 hover:text-rose-300 hover:bg-rose-500/10'">
-              <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-              Admin
-            </NuxtLink>
-          </nav>
-        </div>
-
-        <!-- Right Side: User Profile & Actions -->
-        <div class="hidden md:flex items-center gap-3">
-          <template v-if="user">
-            <!-- Role Badge -->
-            <span class="px-2.5 py-1 text-xs font-semibold rounded-full border" :class="roleBadgeClasses">
-              {{ user.role }}
-            </span>
-
-            <!-- User Menu / Info -->
-            <div class="flex items-center gap-3 pl-3 border-l border-slate-800">
-              <div class="flex items-center gap-2.5">
-                <div
-                  class="w-8 h-8 rounded-full bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center font-bold text-xs uppercase shadow-inner">
-                  {{ userInitials }}
-                </div>
-                <div class="flex flex-col text-left">
-                  <span class="text-xs font-semibold text-slate-200 leading-tight">{{ user.name }}</span>
-                  <span class="text-[11px] text-slate-500 truncate max-w-[140px]">{{ user.email || user.phone }}</span>
-                </div>
-              </div>
-
-              <!-- Logout Button -->
-              <button @click="logout" title="Log out"
-                class="p-2 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 border border-transparent hover:border-rose-500/20 rounded-lg transition-colors cursor-pointer">
-                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                  <path stroke-linecap="round" stroke-linejoin="round"
-                    d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-              </button>
-            </div>
-          </template>
-
-          <template v-else>
-            <NuxtLink to="/login"
-              class="px-4 py-2 text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-900 rounded-lg transition-colors">
-              Sign In
-            </NuxtLink>
-            <NuxtLink to="/register"
-              class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg shadow-md shadow-indigo-600/20 transition-all">
-              Get Started
-            </NuxtLink>
-          </template>
-        </div>
-
-        <!-- Mobile Menu Toggle Button -->
-        <div class="flex md:hidden items-center gap-2">
-          <button @click="mobileMenuOpen = !mobileMenuOpen"
-            class="p-2 text-slate-400 hover:text-white hover:bg-slate-900 rounded-lg transition-colors cursor-pointer"
-            aria-label="Toggle menu">
-            <svg v-if="!mobileMenuOpen" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"
-              stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
-            </svg>
-            <svg v-else class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+      <!-- Center: Search Bar with Glass effect -->
+      <div class="hidden md:flex items-center flex-1 max-w-md mx-4">
+        <div class="relative w-full group">
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-slate-400 group-focus-within:text-indigo-400 transition-colors">
+            <LucideSearch class="w-4 h-4" />
+          </div>
+          <input
+            v-model="searchQuery"
+            type="text"
+            placeholder="Search commands, restaurants, analytics..."
+            class="w-full pl-9 pr-14 py-2 text-xs rounded-xl glass-input text-slate-100 placeholder-slate-400/70 focus:outline-none focus:ring-1 focus:ring-indigo-500/50 focus:border-indigo-500/50 transition-all shadow-inner"
+          />
+          <div class="absolute inset-y-0 right-0 pr-2 flex items-center pointer-events-none">
+            <kbd class="px-1.5 py-0.5 text-[10px] font-mono text-slate-400 bg-white/5 border border-white/10 rounded-md shadow-xs">
+              ⌘K
+            </kbd>
+          </div>
+          <!-- Glow under search input on focus -->
+          <div class="absolute -inset-0.5 bg-gradient-to-r from-indigo-500/20 to-purple-500/20 rounded-xl blur opacity-0 group-focus-within:opacity-100 transition duration-300 pointer-events-none -z-10"></div>
         </div>
       </div>
-    </div>
 
-    <!-- Mobile Dropdown Navigation -->
-    <div v-if="mobileMenuOpen" class="md:hidden border-t border-slate-800 bg-slate-950/95 px-4 pt-3 pb-4 space-y-3">
-      <nav class="space-y-1">
-        <NuxtLink to="/" @click="mobileMenuOpen = false"
-          class="block px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-          :class="route.path === '/' ? 'bg-slate-800 text-white font-semibold' : 'text-slate-400 hover:text-white hover:bg-slate-900'">
-          Dashboard
-        </NuxtLink>
-        <NuxtLink v-if="user?.role === 'ADMIN'" to="/admin" @click="mobileMenuOpen = false"
-          class="block px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-          :class="route.path.startsWith('/admin') ? 'bg-rose-500/10 text-rose-300 font-semibold' : 'text-slate-400 hover:text-rose-300 hover:bg-rose-500/10'">
-          Admin Console
-        </NuxtLink>
-      </nav>
-
-      <div class="pt-3 border-t border-slate-800">
-        <div v-if="user" class="space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <div
-                class="w-8 h-8 rounded-full bg-indigo-600/30 border border-indigo-500/40 text-indigo-300 flex items-center justify-center font-bold text-xs uppercase">
-                {{ userInitials }}
-              </div>
-              <div class="flex flex-col">
-                <span class="text-xs font-semibold text-slate-200">{{ user.name }}</span>
-                <span class="text-[11px] text-slate-500">{{ user.email || user.phone }}</span>
-              </div>
-            </div>
-            <span class="px-2 py-0.5 text-[10px] font-semibold rounded-full border" :class="roleBadgeClasses">
-              {{ user.role }}
-            </span>
-          </div>
-
-          <button @click="logout(); mobileMenuOpen = false"
-            class="w-full flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold bg-rose-600/20 text-rose-300 border border-rose-500/30 rounded-lg hover:bg-rose-600 hover:text-white transition cursor-pointer">
-            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round"
-                d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
-            Logout
-          </button>
+      <!-- Right: Actions & User Profile -->
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- System Health Pill -->
+        <div class="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-500/[0.08] border border-emerald-500/20 backdrop-blur-md">
+          <span class="relative flex h-2 w-2">
+            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+            <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+          </span>
+          <span class="text-[11px] font-medium text-emerald-300">Live</span>
         </div>
 
-        <div v-else class="flex flex-col gap-2">
-          <NuxtLink to="/login" @click="mobileMenuOpen = false"
-            class="w-full py-2 text-center text-xs font-semibold text-slate-300 hover:text-white bg-slate-900 rounded-lg">
-            Sign In
-          </NuxtLink>
-          <NuxtLink to="/register" @click="mobileMenuOpen = false"
-            class="w-full py-2 text-center text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 rounded-lg">
-            Get Started
-          </NuxtLink>
+        <!-- Notifications -->
+        <button
+          type="button"
+          class="relative p-2 rounded-xl text-slate-300 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 transition cursor-pointer"
+          title="Notifications"
+        >
+          <LucideBell class="w-4 h-4" />
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-indigo-500 ring-2 ring-slate-950"></span>
+        </button>
+
+        <!-- User Role Pill -->
+        <div
+          v-if="user?.role"
+          class="hidden sm:inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-[11px] font-medium tracking-wide uppercase bg-gradient-to-r from-indigo-500/20 to-purple-500/20 border border-indigo-500/30 text-indigo-200"
+        >
+          <LucideShield class="w-3 h-3 text-indigo-400" />
+          <span>{{ user.role }}</span>
+        </div>
+
+        <!-- Profile Menu Dropdown -->
+        <div class="relative" ref="profileDropdownRef">
+          <button
+            @click="isDropdownOpen = !isDropdownOpen"
+            type="button"
+            class="flex items-center gap-2.5 p-1 sm:px-2.5 sm:py-1 rounded-xl bg-white/[0.04] hover:bg-white/[0.09] border border-white/10 transition cursor-pointer"
+          >
+            <!-- Avatar -->
+            <div class="w-7 h-7 rounded-lg bg-gradient-to-tr from-indigo-600 to-purple-600 flex items-center justify-center text-xs font-semibold text-white shadow-sm ring-1 ring-white/20">
+              <span v-if="user?.name">{{ user.name.charAt(0).toUpperCase() }}</span>
+              <LucideUser v-else class="w-3.5 h-3.5" />
+            </div>
+            <!-- Name & Role -->
+            <div class="hidden md:flex flex-col text-left">
+              <span class="text-xs font-medium text-slate-200 leading-tight">
+                {{ user?.name || 'Admin User' }}
+              </span>
+              <span class="text-[10px] text-slate-400 leading-tight">
+                {{ user?.email || 'admin@projet.dev' }}
+              </span>
+            </div>
+            <LucideChevronDown class="w-3.5 h-3.5 text-slate-400 hidden sm:block transition-transform duration-200" :class="{ 'rotate-180': isDropdownOpen }" />
+          </button>
+
+          <!-- Glass Dropdown Menu -->
+          <Transition
+            enter-active-class="transition duration-150 ease-out"
+            enter-from-class="transform scale-95 opacity-0 -translate-y-2"
+            enter-to-class="transform scale-100 opacity-100 translate-y-0"
+            leave-active-class="transition duration-100 ease-in"
+            leave-from-class="transform scale-100 opacity-100 translate-y-0"
+            leave-to-class="transform scale-95 opacity-0 -translate-y-2"
+          >
+            <div
+              v-if="isDropdownOpen"
+              class="absolute right-0 mt-2 w-56 rounded-2xl glass-panel p-2 z-50 text-xs shadow-2xl divide-y divide-white/[0.06]"
+            >
+              <div class="px-3 py-2">
+                <p class="font-semibold text-slate-200">{{ user?.name || 'Administrator' }}</p>
+                <p class="text-[11px] text-slate-400 truncate">{{ user?.email || 'admin@projet.dev' }}</p>
+                <span class="inline-block mt-1.5 px-2 py-0.5 rounded text-[10px] font-medium bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                  Role: {{ user?.role || 'ADMIN' }}
+                </span>
+              </div>
+
+              <div class="py-1 space-y-0.5">
+                <NuxtLink
+                  to="/"
+                  @click="isDropdownOpen = false"
+                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/[0.08] transition cursor-pointer"
+                >
+                  <LucideLayoutDashboard class="w-4 h-4 text-indigo-400" />
+                  <span>Dashboard</span>
+                </NuxtLink>
+                <NuxtLink
+                  v-if="user?.role === 'ADMIN'"
+                  to="/docs"
+                  target="_blank"
+                  @click="isDropdownOpen = false"
+                  class="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/[0.08] transition cursor-pointer"
+                >
+                  <LucideBookOpen class="w-4 h-4 text-purple-400" />
+                  <span>API Docs (Scalar)</span>
+                </NuxtLink>
+              </div>
+
+              <div class="pt-1">
+                <button
+                  @click="handleLogout"
+                  type="button"
+                  class="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-rose-300 hover:text-rose-100 hover:bg-rose-500/20 transition cursor-pointer"
+                >
+                  <LucideLogOut class="w-4 h-4" />
+                  <span>Log out</span>
+                </button>
+              </div>
+            </div>
+          </Transition>
         </div>
       </div>
     </div>
@@ -155,38 +185,36 @@
 </template>
 
 <script setup lang="ts">
-const route = useRoute()
 const { user, logout } = useAuth()
+const { isCollapsed, toggleCollapse, toggleMobile } = useSidebar()
 
-const mobileMenuOpen = ref(false)
+const searchQuery = ref('')
+const isDropdownOpen = ref(false)
+const profileDropdownRef = ref<HTMLElement | null>(null)
 
-// Close mobile menu when navigating to another route
-watch(() => route.path, () => {
-  mobileMenuOpen.value = false
-})
+function toggleSidebarAction() {
+  if (import.meta.client && window.innerWidth < 1024) {
+    toggleMobile()
+  } else {
+    toggleCollapse()
+  }
+}
 
-const userInitials = computed(() => {
-  if (!user.value?.name) return "U"
-  return user.value.name
-    .split(" ")
-    .map((part) => part[0])
-    .filter(Boolean)
-    .slice(0, 2)
-    .join("")
-    .toUpperCase()
-})
+async function handleLogout() {
+  isDropdownOpen.value = false
+  await logout()
+}
 
-const roleBadgeClasses = computed(() => {
-  switch (user.value?.role) {
-    case "ADMIN":
-      return "bg-rose-500/10 text-rose-300 border-rose-500/30"
-    case "RESTAURANT_OWNER":
-      return "bg-amber-500/10 text-amber-300 border-amber-500/30"
-    case "DELIVERY_PARTNER":
-      return "bg-cyan-500/10 text-cyan-300 border-cyan-500/30"
-    case "CUSTOMER":
-    default:
-      return "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+// Close dropdown on outside click
+onMounted(() => {
+  if (import.meta.client) {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (profileDropdownRef.value && !profileDropdownRef.value.contains(e.target as Node)) {
+        isDropdownOpen.value = false
+      }
+    }
+    window.addEventListener('click', handleClickOutside)
+    onUnmounted(() => window.removeEventListener('click', handleClickOutside))
   }
 })
 </script>
