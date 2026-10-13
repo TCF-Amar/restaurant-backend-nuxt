@@ -15,6 +15,7 @@ export interface User {
   email: string | null
   phone: string | null
   role: string
+  twoFactorEnabled?: boolean
   createdAt: string
   profile: UserProfile | null
   restaurantStaff?: StaffAssignment[]

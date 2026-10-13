@@ -1,5 +1,6 @@
 import z from "zod"
 import bcrypt from "bcryptjs"
+import { randomUUID } from "node:crypto"
 
 defineRouteMeta({
   openAPI: {
@@ -130,6 +131,25 @@ export default defineEventHandler(async (event) => {
       statusCode: 401,
       statusMessage: "Invalid credentials",
     })
+  }
+
+  // If Two-Factor Authentication is enabled, require 6-digit TOTP code
+  if (user.twoFactorEnabled && user.twoFactorSecret) {
+    const tempToken = randomUUID()
+    await redis.setex(`totp:login-temp:${tempToken}`, 300, JSON.stringify({ userId: user.id }))
+    return {
+      status: "2fa_required",
+      require2FA: true,
+      tempToken,
+      message: "Two-factor authentication required. Please enter your 6-digit code.",
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+      },
+    }
   }
 
   // Issue access & refresh tokens, set cookies, and create session in DB

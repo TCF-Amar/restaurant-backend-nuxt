@@ -58,7 +58,7 @@
           </div>
 
           <!-- Sign Out Button -->
-          <button v-if="user" @click="logout" type="button"
+          <button v-if="user" type="button" @click="logout"
             class="px-3.5 py-2 rounded-xl bg-rose-500/15 hover:bg-rose-500/25 border border-rose-500/30 text-rose-300 hover:text-white text-xs font-semibold transition cursor-pointer flex items-center gap-1.5"
             title="Log out of account">
             <LucideLogOut class="w-3.5 h-3.5" />

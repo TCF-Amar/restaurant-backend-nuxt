@@ -43,6 +43,7 @@ export default defineEventHandler(async (event) => {
       name: true,
       email: true,
       role: true,
+      twoFactorEnabled: true,
       createdAt: true,
       profile: {
         select: {
