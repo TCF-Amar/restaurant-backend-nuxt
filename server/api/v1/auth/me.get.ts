@@ -50,6 +50,13 @@ export default defineEventHandler(async (event) => {
           avatarUrl: true,
         },
       },
+      restaurantStaff: {
+        select: {
+          restaurantId: true,
+          permissions: true,
+          isPrimary: true,
+        },
+      },
     },
   })
 

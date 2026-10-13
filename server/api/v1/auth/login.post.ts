@@ -86,11 +86,26 @@ export default defineEventHandler(async (event) => {
     },
   })
 
-  // Compare password using bcrypt
-  if (!user || !user.password) {
+  if (!user) {
     throw createError({
       statusCode: 401,
       statusMessage: "Invalid credentials",
+    })
+  }
+
+  // Check if user account has been suspended by admin
+  if (user.isSuspended) {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Your account has been suspended by an administrator. Please contact support.",
+    })
+  }
+
+  // Compare password using bcrypt
+  if (!user.password) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "No password has been set for this account. Please sign in with OTP or contact administrator.",
     })
   }
 
