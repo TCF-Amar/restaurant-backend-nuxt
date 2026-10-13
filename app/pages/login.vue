@@ -1,45 +1,57 @@
 <template>
-  <div class="flex-1 flex items-center justify-center p-4">
-    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-xl p-8">
-      <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold tracking-tight text-white">Welcome back</h1>
-        <p class="text-sm text-slate-400 mt-2">Sign in to your account to continue</p>
+  <div class="w-full flex items-center justify-center p-4 sm:p-6">
+    <!-- Glass Overlay Card -->
+    <div
+      class="w-full max-w-sm backdrop-blur bg-white/2 border border-white/20 rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] space-y-6">
+      <div class="text-center space-y-1">
+        <h1 class="text-2xl font-bold text-white tracking-tight drop-shadow-sm">Sign In</h1>
+        <p class="text-xs text-white/65">Enter your credentials to continue</p>
       </div>
 
-      <form @submit.prevent="handleLogin" class="space-y-5">
-        <div v-if="errorMessage" class="p-3 text-sm bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-xl">
+      <form @submit.prevent="handleLogin" class="space-y-4">
+        <!-- Error Message -->
+        <div v-if="errorMessage"
+          class="p-3 text-xs bg-rose-500/20 backdrop-blur-md border border-rose-500/30 text-rose-200 rounded-xl text-center">
           {{ errorMessage }}
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Email or Phone</label>
-          <input v-model="identifier" type="text" required placeholder="name@example.com or phone"
-            class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+        <!-- Identifier -->
+        <div class="space-y-1.5">
+          <label class="block text-xs text-white/80 font-medium">Email or Phone</label>
+          <input v-model="identifier" type="text" required placeholder="name@example.com"
+            class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Password</label>
+        <!-- Password -->
+        <div class="space-y-1.5">
+          <label class="block text-xs text-white/80 font-medium">Password</label>
           <input v-model="password" type="password" required placeholder="••••••••"
-            class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition" />
+            class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
         </div>
 
+        <!-- Glass Submit Button -->
         <button type="submit" :disabled="isLoading"
-          class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition duration-200 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer">
+          class="w-full py-2.5 px-4 bg-white/20 hover:bg-white/30 border border-white/30 disabled:opacity-50 text-white font-semibold text-sm rounded-xl backdrop-blur-md shadow-lg transition active:scale-[0.99] cursor-pointer">
           <span v-if="isLoading">Signing in...</span>
           <span v-else>Sign In</span>
         </button>
       </form>
 
-      <div class="mt-6 text-center text-sm text-slate-400">
+      <!-- Switch to Register -->
+      <p class="text-center text-xs text-white/65">
         Don't have an account?
-        <NuxtLink to="/register" class="text-indigo-400 hover:text-indigo-300 font-medium">Create an account</NuxtLink>
-      </div>
+        <NuxtLink to="/register" class="text-white font-semibold hover:underline ml-1">Register</NuxtLink>
+      </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-const { fetchUser } = useAuth()
+definePageMeta({
+  layout: "auth",
+})
+
+const { fetchUser, user } = useAuth()
 const route = useRoute()
 
 const identifier = ref("")
@@ -60,12 +72,19 @@ async function handleLogin() {
       },
     })
 
-    // Update client-side auth state
     await fetchUser()
 
-    // Redirect to requested page or home
-    const redirectTo = (route.query.redirect as string) || "/"
-    await navigateTo(redirectTo)
+    if (user.value?.role === "CUSTOMER") {
+      await navigateTo("/download")
+      return
+    }
+
+    // Redirect to requested URL if valid, otherwise go to home dashboard '/'
+    const redirectParam = typeof route.query.redirect === "string" ? route.query.redirect : null
+    const isInvalidLegacyRoute = !redirectParam || redirectParam === "/admin" || redirectParam === "/owner"
+    const target = isInvalidLegacyRoute ? "/" : redirectParam
+
+    await navigateTo(target)
   } catch (err: any) {
     errorMessage.value = err?.data?.statusMessage || err?.data?.message || "Invalid credentials"
   } finally {

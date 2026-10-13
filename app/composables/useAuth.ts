@@ -3,6 +3,12 @@ export interface UserProfile {
   avatarUrl: string | null
 }
 
+export interface StaffAssignment {
+  restaurantId: string
+  permissions: string[]
+  isPrimary: boolean
+}
+
 export interface User {
   id: string
   name: string
@@ -11,6 +17,7 @@ export interface User {
   role: string
   createdAt: string
   profile: UserProfile | null
+  restaurantStaff?: StaffAssignment[]
 }
 
 interface MeApiResponse {
@@ -25,6 +32,47 @@ export const useAuth = () => {
   const fetchingUser = useState<boolean>("auth_fetching_user", () => false)
 
   const isAuthenticated = computed(() => !!user.value)
+  const isSuperAdmin = computed(() => user.value?.role === "ADMIN")
+  const isRestaurantOwner = computed(() => user.value?.role === "RESTAURANT_OWNER")
+  const isCustomer = computed(() => user.value?.role === "CUSTOMER")
+
+  function hasRestaurantPermission(permission: string, restaurantId?: string): boolean {
+    if (isSuperAdmin.value) return true
+    if (!isRestaurantOwner.value) return false
+    const staff = user.value?.restaurantStaff || []
+    if (restaurantId) {
+      return staff.some((s) => s.restaurantId === restaurantId && s.permissions.includes(permission))
+    }
+    return staff.some((s) => s.permissions.includes(permission))
+  }
+
+  const canAccessRestaurants = computed(() => {
+    if (isSuperAdmin.value) return true
+    if (!isRestaurantOwner.value) return false
+    const staff = user.value?.restaurantStaff || []
+    return staff.length > 0
+  })
+
+  const canAccessCategories = computed(() => {
+    if (isSuperAdmin.value) return true
+    if (!isRestaurantOwner.value) return false
+    return hasRestaurantPermission("MANAGE_CATEGORIES")
+  })
+
+  const canAccessOrders = computed(() => {
+    if (isSuperAdmin.value) return true
+    if (isRestaurantOwner.value) return hasRestaurantPermission("MANAGE_ORDERS")
+    if (isCustomer.value) return true
+    return false
+  })
+
+  const canAccessUsers = computed(() => {
+    return isSuperAdmin.value
+  })
+
+  const canAccessDocs = computed(() => {
+    return isSuperAdmin.value
+  })
 
   async function fetchUser() {
     try {
@@ -58,6 +106,15 @@ export const useAuth = () => {
   return {
     user,
     isAuthenticated,
+    isSuperAdmin,
+    isRestaurantOwner,
+    isCustomer,
+    hasRestaurantPermission,
+    canAccessRestaurants,
+    canAccessCategories,
+    canAccessOrders,
+    canAccessUsers,
+    canAccessDocs,
     authError,
     initialized,
     fetchingUser,

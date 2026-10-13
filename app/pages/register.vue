@@ -1,82 +1,65 @@
 <template>
-  <div class="flex-1 flex items-center justify-center p-4 py-8">
-    <div class="w-full max-w-md bg-slate-900 border border-slate-800 rounded-2xl shadow-xl p-8">
-      <div class="text-center mb-8">
-        <h1 class="text-2xl font-bold tracking-tight text-white">Create an account</h1>
-        <p class="text-sm text-slate-400 mt-2">Get started by creating your account</p>
+  <div class="w-full flex items-center justify-center p-4 sm:p-6">
+    <!-- Glass Overlay Card -->
+    <div
+      class="w-full max-w-sm backdrop-blur bg-white/2 border border-white/20 rounded-3xl p-8 shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] space-y-6 my-4">
+      <div class="text-center space-y-1">
+        <h1 class="text-2xl font-bold text-white tracking-tight drop-shadow-sm">Create Account</h1>
+        <p class="text-xs text-white/65">Sign up to get started</p>
       </div>
 
       <form @submit.prevent="handleRegister" class="space-y-4">
-        <div v-if="errorMessage" class="p-3 text-sm bg-rose-500/10 border border-rose-500/30 text-rose-400 rounded-xl">
+        <!-- Error Message -->
+        <div v-if="errorMessage"
+          class="p-3 text-xs bg-rose-500/20 backdrop-blur-md border border-rose-500/30 text-rose-200 rounded-xl text-center">
           {{ errorMessage }}
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Full Name</label>
-          <input
-            v-model="name"
-            type="text"
-            required
-            placeholder="John Doe"
-            class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-          />
+        <!-- Full Name -->
+        <div class="space-y-1.5">
+          <label class="block text-xs text-white/80 font-medium">Full Name</label>
+          <input v-model="name" type="text" required placeholder="John Doe"
+            class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Email Address</label>
-          <input
-            v-model="email"
-            type="email"
-            required
-            placeholder="name@example.com"
-            class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-          />
+        <!-- Email -->
+        <div class="space-y-1.5">
+          <label class="block text-xs text-white/80 font-medium">Email Address</label>
+          <input v-model="email" type="email" required placeholder="name@example.com"
+            class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Phone (Optional)</label>
-          <input
-            v-model="phone"
-            type="tel"
-            placeholder="+1234567890"
-            class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-          />
+        <!-- Password -->
+        <div class="space-y-1.5">
+          <label class="block text-xs text-white/80 font-medium">Password</label>
+          <input v-model="password" type="password" required minlength="6" placeholder="Minimum 6 characters"
+            class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
         </div>
 
-        <div>
-          <label class="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-2">Password</label>
-          <input
-            v-model="password"
-            type="password"
-            required
-            minlength="6"
-            placeholder="Minimum 6 characters"
-            class="w-full px-4 py-3 bg-slate-950 border border-slate-800 rounded-xl text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
-          />
-        </div>
-
-        <button
-          type="submit"
-          :disabled="isLoading"
-          class="w-full py-3 px-4 mt-2 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold rounded-xl transition duration-200 shadow-md shadow-indigo-600/20 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
-        >
+        <!-- Glass Submit Button -->
+        <button type="submit" :disabled="isLoading"
+          class="w-full py-2.5 px-4 bg-white/20 hover:bg-white/30 border border-white/30 disabled:opacity-50 text-white font-semibold text-sm rounded-xl backdrop-blur-md shadow-lg transition active:scale-[0.99] cursor-pointer">
           <span v-if="isLoading">Creating account...</span>
           <span v-else>Register</span>
         </button>
       </form>
 
-      <div class="mt-6 text-center text-sm text-slate-400">
+      <!-- Switch to Login -->
+      <p class="text-center text-xs text-white/65">
         Already have an account?
-        <NuxtLink to="/login" class="text-indigo-400 hover:text-indigo-300 font-medium">Sign in</NuxtLink>
-      </div>
+        <NuxtLink to="/login" class="text-white font-semibold hover:underline ml-1">Sign in</NuxtLink>
+      </p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+definePageMeta({
+  layout: "auth",
+})
+
 const name = ref("")
 const email = ref("")
-const phone = ref("")
 const password = ref("")
 const isLoading = ref(false)
 const errorMessage = ref("")
@@ -92,11 +75,10 @@ async function handleRegister() {
         name: name.value,
         email: email.value,
         password: password.value,
-        phone: phone.value ? phone.value : undefined,
       },
     })
 
-    // Auto-login after successful registration
+    // Auto-login after registration
     await $fetch("/api/v1/auth/login", {
       method: "POST",
       body: {
@@ -105,9 +87,14 @@ async function handleRegister() {
       },
     })
 
-    const { fetchUser } = useAuth()
+    const { user, fetchUser } = useAuth()
     await fetchUser()
-    await navigateTo("/")
+
+    if (user.value?.role === "CUSTOMER") {
+      await navigateTo("/download")
+    } else {
+      await navigateTo("/")
+    }
   } catch (err: any) {
     errorMessage.value = err?.data?.statusMessage || err?.data?.message || "Registration failed"
   } finally {
