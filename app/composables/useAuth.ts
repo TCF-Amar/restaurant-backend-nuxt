@@ -91,7 +91,7 @@ export const useAuth = () => {
     }
   }
 
-  async function logout() {
+  async function logout(redirectPath = "/login") {
     try {
       await $fetch("/api/v1/auth/logout", { method: "POST" })
     } catch (err) {
@@ -99,7 +99,7 @@ export const useAuth = () => {
     } finally {
       user.value = null
       initialized.value = true
-      await navigateTo("/login")
+      await navigateTo(redirectPath)
     }
   }
 

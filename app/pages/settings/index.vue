@@ -150,18 +150,98 @@
 
         <!-- TAB 2: Security & Password -->
         <div v-if="activeTab === 'security'" class="rounded-3xl glass-card p-6 sm:p-8 border border-white/10 space-y-6">
-          <div class="border-b border-white/[0.08] pb-4">
-            <h2 class="text-lg font-bold text-white">Password & Authentication</h2>
-            <p class="text-xs text-slate-400">Update your account password and manage authentication credentials.</p>
+          <div class="border-b border-white/[0.08] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <h2 class="text-lg font-bold text-white">Password & Authentication</h2>
+              <p class="text-xs text-slate-400">Update your account credentials using your current password or verification code.</p>
+            </div>
+
+            <!-- Mode Selector Tabs -->
+            <div class="flex items-center gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs self-start sm:self-auto">
+              <button
+                type="button"
+                @click="passwordMode = 'current'"
+                :class="[
+                  'px-3 py-1.5 rounded-lg font-medium transition cursor-pointer',
+                  passwordMode === 'current'
+                    ? 'bg-indigo-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                ]"
+              >
+                Current Password
+              </button>
+              <button
+                type="button"
+                @click="passwordMode = 'otp'"
+                :class="[
+                  'px-3 py-1.5 rounded-lg font-medium transition cursor-pointer flex items-center gap-1.5',
+                  passwordMode === 'otp'
+                    ? 'bg-purple-600 text-white shadow-md'
+                    : 'text-slate-400 hover:text-white'
+                ]"
+              >
+                <LucideKeyRound class="w-3.5 h-3.5" />
+                <span>Forgot / Verify via OTP</span>
+              </button>
+            </div>
           </div>
 
           <form @submit.prevent="handleChangePassword" class="space-y-4 max-w-lg">
-            <!-- Current Password -->
-            <div class="space-y-1.5">
-              <label class="block text-xs font-medium text-slate-300">Current Password</label>
+            <!-- Mode 1: Current Password -->
+            <div v-if="passwordMode === 'current'" class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs font-medium text-slate-300">Current Password</label>
+                <button
+                  type="button"
+                  @click="passwordMode = 'otp'"
+                  class="text-[11px] text-purple-400 hover:text-purple-300 transition cursor-pointer"
+                >
+                  Forgot current password?
+                </button>
+              </div>
               <input v-model="passwordForm.currentPassword" type="password" required
                 placeholder="Enter current password"
                 class="w-full px-3.5 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" />
+            </div>
+
+            <!-- Mode 2: Verify via OTP -->
+            <div v-else-if="passwordMode === 'otp'" class="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/20 space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <div class="text-xs">
+                  <span class="text-slate-300 font-medium">Verify via OTP</span>
+                  <p class="text-[11px] text-purple-200 mt-0.5">
+                    Code will be sent to: <strong class="text-white">{{ user?.email || user?.phone }}</strong>
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  @click="handleSendSettingsOtp"
+                  :disabled="isSendingOtp || otpCooldown > 0"
+                  class="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-500 disabled:opacity-50 text-white text-xs font-semibold shadow-md transition cursor-pointer flex items-center gap-1.5 shrink-0"
+                >
+                  <LucideLoader2 v-if="isSendingOtp" class="w-3 h-3 animate-spin" />
+                  <LucideSend v-else class="w-3 h-3" />
+                  <span>{{ otpCooldown > 0 ? `Resend (${otpCooldown}s)` : 'Send Code' }}</span>
+                </button>
+              </div>
+
+              <!-- Demo code alert in dev -->
+              <div v-if="otpDebugCode" class="p-2 rounded-xl bg-purple-500/20 border border-purple-500/30 text-[11px] text-purple-200 flex items-center justify-between font-mono">
+                <span>Demo Verification Code:</span>
+                <span class="font-bold text-amber-300 tracking-wider">{{ otpDebugCode }}</span>
+              </div>
+
+              <div class="space-y-1.5">
+                <label class="block text-xs font-medium text-slate-300">Enter 6-Digit Code *</label>
+                <input
+                  v-model="passwordForm.otpCode"
+                  type="text"
+                  maxlength="6"
+                  required
+                  placeholder="123456"
+                  class="w-full tracking-widest font-mono text-center px-3.5 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-purple-500/50"
+                />
+              </div>
             </div>
 
             <!-- New Password -->
@@ -179,13 +259,17 @@
                 class="w-full px-3.5 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" />
             </div>
 
-            <div class="pt-2">
+            <div class="pt-2 flex items-center justify-between">
               <button type="submit" :disabled="isChangingPassword"
-                class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/40 text-white text-xs font-semibold backdrop-blur-md shadow-lg transition active:scale-95 cursor-pointer disabled:opacity-50">
-                <span v-if="isChangingPassword">Updating Password...</span>
-                <span v-else>Update Password</span>
+                class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/40 text-white text-xs font-semibold backdrop-blur-md shadow-lg transition active:scale-95 cursor-pointer disabled:opacity-50 flex items-center gap-2">
+                <LucideLoader2 v-if="isChangingPassword" class="w-3.5 h-3.5 animate-spin" />
+                <LucideSave v-else class="w-3.5 h-3.5" />
+                <span>{{ isChangingPassword ? 'Updating Password...' : 'Save Password & Sign Out' }}</span>
               </button>
             </div>
+            <p class="text-[11px] text-slate-400 leading-relaxed">
+              * For security, changing your password will immediately end all active sessions and require you to sign back in.
+            </p>
           </form>
 
           <!-- 2FA Section -->
@@ -391,7 +475,7 @@
 </template>
 
 <script setup lang="ts">
-const { user, fetchUser } = useAuth()
+const { user, fetchUser, logout } = useAuth()
 const { sidebarWidth, minWidth, maxWidth, isCollapsed, setCollapsed, resetWidth } = useSidebar()
 const { blurRadius, setBlur } = useGlassSettings()
 
@@ -434,12 +518,63 @@ function handleSaveProfile() {
 }
 
 // Password Form State
+const passwordMode = ref<'current' | 'otp'>('current')
 const passwordForm = reactive({
   currentPassword: '',
+  otpCode: '',
   newPassword: '',
   confirmPassword: '',
 })
 const isChangingPassword = ref(false)
+const isSendingOtp = ref(false)
+const otpDebugCode = ref('')
+const otpCooldown = ref(0)
+let otpTimer: any = null
+
+function startOtpCooldown(seconds = 60) {
+  otpCooldown.value = seconds
+  clearInterval(otpTimer)
+  otpTimer = setInterval(() => {
+    if (otpCooldown.value > 0) {
+      otpCooldown.value--
+    } else {
+      clearInterval(otpTimer)
+    }
+  }, 1000)
+}
+
+onUnmounted(() => {
+  clearInterval(otpTimer)
+})
+
+async function handleSendSettingsOtp() {
+  const identifier = user.value?.email || user.value?.phone
+  if (!identifier) {
+    toastType.value = 'error'
+    toastMessage.value = 'No registered email or phone found on your profile to send code.'
+    return
+  }
+
+  isSendingOtp.value = true
+  otpDebugCode.value = ''
+  try {
+    const res = await $fetch<any>('/api/v1/auth/password/forgot', {
+      method: 'POST',
+      body: { identifier },
+    })
+    toastType.value = 'success'
+    toastMessage.value = res.message || 'Verification code dispatched to your email.'
+    if (res.debugOtp) {
+      otpDebugCode.value = res.debugOtp
+    }
+    startOtpCooldown(res.cooldownSeconds || 60)
+  } catch (err: any) {
+    toastType.value = 'error'
+    toastMessage.value = err?.data?.statusMessage || err?.data?.message || err?.message || 'Failed to dispatch verification code.'
+  } finally {
+    isSendingOtp.value = false
+  }
+}
 
 async function handleChangePassword() {
   if (passwordForm.newPassword !== passwordForm.confirmPassword) {
@@ -448,25 +583,39 @@ async function handleChangePassword() {
     return
   }
 
+  if (passwordMode.value === 'current' && !passwordForm.currentPassword) {
+    toastType.value = 'error'
+    toastMessage.value = 'Please enter your current password.'
+    return
+  }
+
+  if (passwordMode.value === 'otp' && (!passwordForm.otpCode || passwordForm.otpCode.trim().length !== 6)) {
+    toastType.value = 'error'
+    toastMessage.value = 'Please enter the 6-digit verification code.'
+    return
+  }
+
   isChangingPassword.value = true
   try {
     await $fetch('/api/v1/auth/password/change', {
       method: 'POST',
       body: {
-        currentPassword: passwordForm.currentPassword,
+        currentPassword: passwordMode.value === 'current' ? passwordForm.currentPassword : undefined,
+        otpCode: passwordMode.value === 'otp' ? passwordForm.otpCode.trim() : undefined,
         newPassword: passwordForm.newPassword,
         confirmPassword: passwordForm.confirmPassword,
       },
     })
     toastType.value = 'success'
-    toastMessage.value = 'Password updated successfully! Other sessions have been revoked.'
-    passwordForm.currentPassword = ''
-    passwordForm.newPassword = ''
-    passwordForm.confirmPassword = ''
+    toastMessage.value = 'Password updated successfully! Logging you out for security...'
+
+    // Automatically log user out and redirect to login as requested
+    setTimeout(async () => {
+      await logout('/login?passwordChanged=true')
+    }, 1200)
   } catch (err: any) {
     toastType.value = 'error'
-    toastMessage.value = err?.data?.message || err?.message || 'Failed to update password.'
-  } finally {
+    toastMessage.value = err?.data?.statusMessage || err?.data?.message || err?.message || 'Failed to update password.'
     isChangingPassword.value = false
   }
 }

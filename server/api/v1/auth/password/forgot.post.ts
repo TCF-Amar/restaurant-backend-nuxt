@@ -77,8 +77,8 @@ export default defineEventHandler(async (event) => {
     select: { id: true, email: true, phone: true },
   })
 
-  // Prevent email/phone enumeration:
-  // If user does not exist, return success response without sending email
+  let debugOtp: string | undefined
+
   if (user) {
     const otp = generateNumericOtp(6)
     await saveOtp(normalizedIdentifier, otp)
@@ -90,7 +90,10 @@ export default defineEventHandler(async (event) => {
       await sendOtpSmsJob(identifier.trim(), otp)
     }
 
-    console.info(`[Auth:Forgot] Dispatched reset OTP to ${normalizedIdentifier}`)
+    console.info(`[Auth:Forgot] Dispatched reset OTP [${otp}] to ${normalizedIdentifier}`)
+    if (process.env.NODE_ENV !== "production") {
+      debugOtp = otp
+    }
   } else {
     console.warn(`[Auth:Forgot] Identifier not registered: ${normalizedIdentifier}`)
   }
@@ -99,5 +102,6 @@ export default defineEventHandler(async (event) => {
     status: "ok",
     message: "If an account exists with this identifier, a verification code has been sent",
     cooldownSeconds: OTP_RESEND_COOLDOWN_SECONDS,
+    debugOtp,
   }
 })

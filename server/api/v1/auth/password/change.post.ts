@@ -63,6 +63,7 @@ export default defineEventHandler(async (event) => {
   const schema = z
     .object({
       currentPassword: z.string().optional(),
+      otpCode: z.string().optional(),
       newPassword: z.string().min(8, "New password must be at least 8 characters long"),
       confirmPassword: z.string().min(8),
     })
@@ -70,12 +71,16 @@ export default defineEventHandler(async (event) => {
       message: "Passwords do not match",
       path: ["confirmPassword"],
     })
+    .refine((data) => !!data.currentPassword || !!data.otpCode, {
+      message: "Either current password or verification code (OTP) is required",
+      path: ["currentPassword"],
+    })
 
-  const { currentPassword, newPassword } = schema.parse(body)
+  const { currentPassword, otpCode, newPassword } = schema.parse(body)
 
   const user = await prisma.user.findUnique({
     where: { id: claims.sub },
-    select: { id: true, password: true },
+    select: { id: true, email: true, phone: true, password: true },
   })
 
   if (!user) {
@@ -85,8 +90,25 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // If user already has a password, verify current password
-  if (user.password) {
+  // 1. If OTP provided, verify and consume OTP
+  if (otpCode) {
+    const identifier = (user.email || user.phone || "").trim().toLowerCase()
+    if (!identifier) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "No registered email or phone found to verify code",
+      })
+    }
+
+    const isOtpValid = await verifyAndConsumeOtp(identifier, otpCode.trim())
+    if (!isOtpValid) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "Invalid or expired verification code",
+      })
+    }
+  } else if (user.password) {
+    // 2. Otherwise verify current password
     if (!currentPassword) {
       throw createError({
         statusCode: 400,
@@ -121,13 +143,14 @@ export default defineEventHandler(async (event) => {
     data: { password: hashedPassword },
   })
 
-  // Security best practice: Revoke all other active sessions (keep current session active)
-  await revokeAllUserSessions(user.id, claims.sid)
+  // Security requirement: Revoke ALL user sessions and clear auth cookies so user is logged out
+  await revokeAllUserSessions(user.id)
+  clearAuthCookies(event)
 
-  console.info(`[Auth] User ${user.id} successfully changed password. Other sessions revoked.`)
+  console.info(`[Auth] User ${user.id} updated password via ${otpCode ? "OTP" : "current password"}. All sessions revoked.`)
 
   return {
     status: "ok",
-    message: "Password changed successfully",
+    message: "Password changed successfully. Please log in with your new password.",
   }
 })

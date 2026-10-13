@@ -9,6 +9,12 @@
       </div>
 
       <form @submit.prevent="handleLogin" class="space-y-4">
+        <!-- Success Message -->
+        <div v-if="successMessage"
+          class="p-3 text-xs bg-emerald-500/20 backdrop-blur-md border border-emerald-500/40 text-emerald-200 rounded-xl text-center">
+          {{ successMessage }}
+        </div>
+
         <!-- Error Message -->
         <div v-if="errorMessage"
           class="p-3 text-xs bg-rose-500/20 backdrop-blur-md border border-rose-500/30 text-rose-200 rounded-xl text-center">
@@ -24,7 +30,12 @@
 
         <!-- Password -->
         <div class="space-y-1.5">
-          <label class="block text-xs text-white/80 font-medium">Password</label>
+          <div class="flex items-center justify-between">
+            <label class="block text-xs text-white/80 font-medium">Password</label>
+            <NuxtLink to="/forgot-password" class="text-xs text-indigo-300 hover:text-white transition">
+              Forgot password?
+            </NuxtLink>
+          </div>
           <input v-model="password" type="password" required placeholder="••••••••"
             class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
         </div>
@@ -58,6 +69,15 @@ const identifier = ref("")
 const password = ref("")
 const isLoading = ref(false)
 const errorMessage = ref("")
+const successMessage = ref("")
+
+onMounted(() => {
+  if (route.query.passwordChanged) {
+    successMessage.value = "Password changed successfully! Please sign in with your new password."
+  } else if (route.query.reset) {
+    successMessage.value = "Password reset successfully! Please sign in with your new password."
+  }
+})
 
 async function handleLogin() {
   errorMessage.value = ""
