@@ -82,7 +82,7 @@ export default defineEventHandler(async (event) => {
         select: {
           id: true,
           email: true,
-          fullName: true,
+          name: true,
           phone: true,
         },
       },
@@ -159,7 +159,7 @@ export default defineEventHandler(async (event) => {
         currency: rzpOrder.currency,
         keyId: getRazorpayKeyId(),
         customer: {
-          name: order.user?.fullName || "",
+          name: order.user?.name || "",
           email: order.user?.email || "",
           phone: order.user?.phone || "",
         },
@@ -226,7 +226,7 @@ export default defineEventHandler(async (event) => {
         amount: Math.round(orderAmount * 100), // in cents
         currency: selectedCurrency.toUpperCase(),
         customer: {
-          name: order.user?.fullName || "",
+          name: order.user?.name || "",
           email: order.user?.email || "",
         },
       }
