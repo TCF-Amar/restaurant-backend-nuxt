@@ -61,7 +61,8 @@
             <LucideSparkles class="w-3.5 h-3.5 text-indigo-400" />
             <span>Glass Blur Radius (Pixels)</span>
           </p>
-          <p class="text-[11px] text-slate-400">Choose exact backdrop blur radius in pixels for header, sidebar, footer & cards</p>
+          <p class="text-[11px] text-slate-400">Choose exact backdrop blur radius in pixels for header, sidebar, footer
+            & cards</p>
         </div>
         <div class="flex items-center gap-2">
           <input type="number" min="0" max="32" step="0.5" :value="blurRadius"
@@ -99,7 +100,8 @@
           class="glass-header border border-white/20 w-[90%] h-[70%] flex flex-col justify-center items-center gap-3 rounded-lg text-center"
           :style="{ backdropFilter: `blur(${blurRadius}px)` }">
           <p class="text-xs font-semibold text-white">Live Blur & Wallpaper Preview: {{ blurRadius }}px</p>
-          <p class="text-[10px] text-slate-300">Header, sidebar & footer instantly update with your selected wallpaper and blur.</p>
+          <p class="text-[10px] text-slate-300">Header, sidebar & footer instantly update with your selected wallpaper
+            and blur.</p>
         </div>
       </div>
     </div>
@@ -112,14 +114,11 @@
             <LucideImage class="w-3.5 h-3.5 text-indigo-400" />
             <span>Background Wallpaper & Ambience</span>
           </p>
-          <p class="text-[11px] text-slate-400">Choose from curated 3D liquid glass wallpapers or enter a custom image URL</p>
+          <p class="text-[11px] text-slate-400">Choose from curated 3D liquid glass wallpapers or enter a custom image
+            URL</p>
         </div>
-        <button
-          v-if="backgroundImage !== defaultWallpaper"
-          @click="resetWallpaper"
-          type="button"
-          class="text-[11px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2 cursor-pointer flex items-center gap-1"
-        >
+        <button v-if="backgroundImage !== defaultWallpaper" @click="resetWallpaper" type="button"
+          class="text-[11px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2 cursor-pointer flex items-center gap-1">
           <LucideRotateCcw class="w-3 h-3" />
           <span>Reset Wallpaper</span>
         </button>
@@ -127,36 +126,27 @@
 
       <!-- Wallpaper Preset Cards Grid -->
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        <div
-          v-for="wp in wallpaperPresets"
-          :key="wp.url"
-          @click="setBackgroundImage(wp.url)"
-          :class="[
-            'group relative rounded-xl border p-2 flex flex-col gap-2 cursor-pointer transition-all duration-300 overflow-hidden text-left',
-            backgroundImage === wp.url
-              ? 'bg-indigo-600/20 border-indigo-500 shadow-lg shadow-indigo-500/20 ring-1 ring-indigo-500/60'
-              : 'bg-white/[0.02] border-white/10 hover:border-white/30 hover:bg-white/[0.04]'
-          ]"
-        >
+        <div v-for="wp in wallpaperPresets" :key="wp.url" @click="setBackgroundImage(wp.url)" :class="[
+          'group relative rounded-xl border p-2 flex flex-col gap-2 cursor-pointer transition-all duration-300 overflow-hidden text-left',
+          backgroundImage === wp.url
+            ? 'bg-indigo-600/20 border-indigo-500 shadow-lg shadow-indigo-500/20 ring-1 ring-indigo-500/60'
+            : 'bg-white/[0.02] border-white/10 hover:border-white/30 hover:bg-white/[0.04]'
+        ]">
           <!-- Thumbnail with overlay -->
           <div class="relative w-full h-24 rounded-lg overflow-hidden bg-slate-900 border border-white/5">
-            <img
-              :src="wp.url"
-              :alt="wp.title"
-              class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
-            />
+            <img :src="wp.url" :alt="wp.title"
+              class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500" />
             <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
             <!-- Active Check Badge -->
-            <div
-              v-if="backgroundImage === wp.url"
-              class="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm"
-            >
+            <div v-if="backgroundImage === wp.url"
+              class="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm">
               <LucideCheck class="w-2.5 h-2.5" />
               <span>Active</span>
             </div>
             <!-- Tag -->
             <div class="absolute bottom-1.5 left-2">
-              <span class="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/15 backdrop-blur-md text-white border border-white/10">
+              <span
+                class="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/15 backdrop-blur-md text-white border border-white/10">
                 {{ wp.tag }}
               </span>
             </div>
@@ -177,19 +167,11 @@
           <span>Custom Background Image URL</span>
         </label>
         <div class="flex items-center gap-2">
-          <input
-            v-model="customUrl"
-            type="url"
-            placeholder="https://example.com/your-wallpaper.jpg"
+          <input v-model="customUrl" type="url" placeholder="https://example.com/your-wallpaper.jpg"
             @keyup.enter="applyCustomUrl"
-            class="flex-1 px-3 py-2 rounded-xl glass-input text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
-          />
-          <button
-            @click="applyCustomUrl"
-            :disabled="!customUrl.trim()"
-            type="button"
-            class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium text-white shadow-sm transition cursor-pointer"
-          >
+            class="flex-1 px-3 py-2 rounded-xl glass-input text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono" />
+          <button @click="applyCustomUrl" :disabled="!customUrl.trim()" type="button"
+            class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium text-white shadow-sm transition cursor-pointer">
             Apply
           </button>
         </div>
@@ -211,7 +193,25 @@ const wallpaperPresets = [
     title: 'Liquid Chromatic Ribbon',
     desc: 'Iridescent refractive glass ribbons in deep obsidian space',
     url: '/images/cyber-glass-bg.jpg',
-    tag: 'Ultra Luxury',
+    tag: 'Chromatic',
+  },
+  {
+    title: 'Emerald Jade Luxury',
+    desc: 'Luminous jade turquoise glass curves with shimmering gold caustics',
+    url: '/images/emerald-glass-bg.jpg',
+    tag: 'Emerald Gold',
+  },
+  {
+    title: 'Sunset Amber & Magenta',
+    desc: 'Warm sunset rose gold and neon magenta crystal ribbons',
+    url: '/images/sunset-amber-bg.jpg',
+    tag: 'Sunset Warmth',
+  },
+  {
+    title: 'Sapphire Cobalt Oceanic',
+    desc: 'Electric royal sapphire and deep oceanic crystalline glass waves',
+    url: '/images/sapphire-cobalt-bg.jpg',
+    tag: 'Neon Sapphire',
   },
   {
     title: 'Dark Obsidian Wave',
@@ -259,4 +259,3 @@ const presets = [
   { px: 24, label: '24px (Heavy)' },
 ]
 </script>
-
