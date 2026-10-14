@@ -2,44 +2,128 @@ import { z } from "zod"
 import { requireAuth } from "../../../utils/guard"
 import { prisma } from "../../../utils/prisma"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Orders & Checkout"],
+    summary: "Place food order (Flutter Checkout)",
+    description: "Submit a new food delivery order from Flutter app. Recalculates prices server-side, validates dish availability, snapshots delivery address, and creates order transaction.",
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["restaurantId", "items"],
+            properties: {
+              restaurantId: { type: "string", description: "Target restaurant ID" },
+              addressId: { type: "string", nullable: true, description: "ID of user's saved address" },
+              deliveryAddress: {
+                type: "object",
+                nullable: true,
+                description: "Inline address snapshot if addressId not supplied",
+              },
+              notes: { type: "string", nullable: true, example: "Extra napkins please, ring bell." },
+              paymentMethod: {
+                type: "string",
+                enum: ["CASH_ON_DELIVERY", "CARD", "UPI", "WALLET"],
+                default: "CASH_ON_DELIVERY",
+              },
+              items: {
+                type: "array",
+                items: {
+                  type: "object",
+                  required: ["menuItemId", "quantity"],
+                  properties: {
+                    menuItemId: { type: "string" },
+                    quantity: { type: "integer", minimum: 1, maximum: 99 },
+                    variantId: { type: "string", nullable: true },
+                    addonIds: { type: "array", items: { type: "string" } },
+                    notes: { type: "string", nullable: true },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: {
+        description: "Order placed successfully",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                status: { type: "string", example: "ok" },
+                message: { type: "string", example: "Order placed successfully" },
+                order: { type: "object" },
+              },
+            },
+          },
+        },
+      },
+      400: { description: "Invalid order payload or item out of stock" },
+      404: { description: "Restaurant or item not found" },
+    },
+  },
+})
+
 const orderItemSchema = z.object({
-  menuItemId: z.string().min(1, "Menu item ID is required"),
-  quantity: z.number().int().min(1, "Quantity must be at least 1").max(99),
-  variantId: z.string().optional().nullable(),
-  addonIds: z.array(z.string()).optional().default([]),
+  menuItemId: z.string({ error: "menuItemId is required" }).min(1, "menuItemId cannot be empty"),
+  quantity: z.number({ error: "quantity must be a number" }).int().min(1, "Quantity must be at least 1").max(99),
+  variantId: z.string().optional().nullable().or(z.literal("")),
+  addonIds: z.array(z.string()).optional().nullable().default([]),
   notes: z.string().optional().nullable(),
 })
 
 const createOrderSchema = z.object({
-  restaurantId: z.string().min(1, "Restaurant ID is required"),
+  restaurantId: z.string({ error: "restaurantId is required" }).min(1, "restaurantId cannot be empty"),
   addressId: z.string().optional().nullable(),
   deliveryAddress: z
     .object({
-      recipientName: z.string(),
-      phone: z.string(),
-      addressLine1: z.string(),
+      recipientName: z.string({ error: "recipientName is required" }).min(1, "recipientName cannot be empty"),
+      phone: z.string({ error: "phone is required" }).min(1, "phone cannot be empty"),
+      addressLine1: z.string({ error: "addressLine1 is required" }).min(1, "addressLine1 cannot be empty"),
       addressLine2: z.string().optional().nullable(),
       landmark: z.string().optional().nullable(),
-      city: z.string(),
-      state: z.string(),
-      postalCode: z.string(),
+      city: z.string({ error: "city is required" }).min(1, "city cannot be empty"),
+      state: z.string({ error: "state is required" }).min(1, "state cannot be empty"),
+      postalCode: z.string({ error: "postalCode is required" }).min(1, "postalCode cannot be empty"),
     })
     .optional()
     .nullable(),
   notes: z.string().optional().nullable(),
-  paymentMethod: z.enum(["CASH_ON_DELIVERY", "CARD", "UPI", "WALLET"]).default("CASH_ON_DELIVERY"),
-  items: z.array(orderItemSchema).min(1, "Order must contain at least 1 item"),
+  paymentMethod: z
+    .enum(["CASH_ON_DELIVERY", "CARD", "UPI", "WALLET"])
+    .optional()
+    .default("CASH_ON_DELIVERY"),
+  items: z
+    .array(orderItemSchema, { error: "items array is required" })
+    .min(1, "Order must contain at least 1 item"),
 })
 
 export default defineEventHandler(async (event) => {
   const claims = requireAuth(event)
-  const body = await readBody(event)
+  const body = (await readBody(event).catch(() => ({}))) || {}
   const parsed = createOrderSchema.safeParse(body)
 
   if (!parsed.success) {
+    const firstIssue = parsed.error.issues[0]
+    const path = firstIssue?.path?.length ? firstIssue.path.join(".") : null
+    const msg = firstIssue?.message || "Invalid input"
+    const formattedError = path ? `Field '${path}': ${msg}` : msg
+
     throw createError({
       statusCode: 400,
-      statusMessage: parsed.error.issues[0]?.message || "Invalid order data",
+      statusMessage: formattedError,
+      data: {
+        errors: parsed.error.issues.map((i) => ({
+          field: i.path.join("."),
+          message: i.message,
+        })),
+      },
     })
   }
 
@@ -70,8 +154,8 @@ export default defineEventHandler(async (event) => {
 
     const address = profile
       ? await prisma.address.findFirst({
-          where: { id: addressId, profileId: profile.id },
-        })
+        where: { id: addressId, profileId: profile.id },
+      })
       : null
 
     if (!address) {
@@ -93,7 +177,36 @@ export default defineEventHandler(async (event) => {
   } else if (deliveryAddress) {
     addressSnapshot = deliveryAddress
   } else {
-    throw createError({ statusCode: 400, statusMessage: "A delivery address is required to place an order" })
+    // Attempt fallback to user's saved default address
+    const profile = await prisma.profile.findUnique({
+      where: { userId: claims.sub },
+      include: {
+        addresses: {
+          orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
+        },
+      },
+    })
+
+    const defaultAddress = profile?.addresses?.[0]
+    if (defaultAddress) {
+      resolvedAddressId = defaultAddress.id
+      addressSnapshot = {
+        label: defaultAddress.label,
+        recipientName: defaultAddress.recipientName,
+        phone: defaultAddress.phone,
+        addressLine1: defaultAddress.addressLine1,
+        addressLine2: defaultAddress.addressLine2,
+        landmark: defaultAddress.landmark,
+        city: defaultAddress.city,
+        state: defaultAddress.state,
+        postalCode: defaultAddress.postalCode,
+      }
+    } else {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "A delivery address is required. Please provide addressId, deliveryAddress, or save a default address.",
+      })
+    }
   }
 
   // Fetch all menu items referenced in the order
@@ -140,8 +253,8 @@ export default defineEventHandler(async (event) => {
     let unitPrice = Number(dbItem.price)
     let selectedVariantName: string | null = null
 
-    // If variant chosen, validate and use variant price
-    if (item.variantId) {
+    // If variant chosen, validate and use variant price (otherwise uses dbItem.price)
+    if (item.variantId && item.variantId.trim() !== "") {
       const variant = dbItem.variants.find((v) => v.id === item.variantId)
       if (!variant) {
         throw createError({
@@ -153,9 +266,9 @@ export default defineEventHandler(async (event) => {
       selectedVariantName = variant.name
     }
 
-    // If addons chosen, validate and sum addon prices
+    // If addons chosen, validate and sum addon prices (otherwise no extra charges)
     const selectedAddons: Array<{ id: string; name: string; price: number }> = []
-    if (item.addonIds && item.addonIds.length > 0) {
+    if (Array.isArray(item.addonIds) && item.addonIds.length > 0) {
       for (const addonId of item.addonIds) {
         const addon = dbItem.addons.find((a) => a.id === addonId)
         if (addon) {
@@ -203,6 +316,19 @@ export default defineEventHandler(async (event) => {
         paymentMethod,
         addressId: resolvedAddressId,
         deliveryAddress: addressSnapshot,
+        payment: {
+          create: {
+            userId: claims.sub,
+            restaurantId,
+            amount: totalOrderAmount,
+            currency: "USD",
+            status: paymentMethod === "CASH_ON_DELIVERY" ? "PENDING" : "COMPLETED",
+            method: (["CASH_ON_DELIVERY", "CARD", "ONLINE", "STRIPE", "RAZORPAY", "WALLET"].includes(paymentMethod)
+              ? paymentMethod
+              : "CASH_ON_DELIVERY") as any,
+            transactionId: `TXN-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
+          },
+        },
         items: {
           create: orderItemsData.map((oi) => ({
             menuItemId: oi.menuItemId,
@@ -214,6 +340,7 @@ export default defineEventHandler(async (event) => {
         },
       },
       include: {
+        payment: true,
         restaurant: {
           select: {
             id: true,

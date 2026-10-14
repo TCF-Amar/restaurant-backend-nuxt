@@ -307,7 +307,12 @@ const managementNavItems = computed<NavItem[]>(() => {
     items.push({ label: 'Orders Feed', path: '/orders', icon: 'LucideShoppingBag' })
   }
 
-  // 4. Users & Roles: ONLY for admin; NEVER for restaurant owner or customer
+  // 4. Payments: shown if admin OR if restaurant owner
+  if (isSuperAdmin.value || canAccessRestaurants.value) {
+    items.push({ label: 'Payments', path: '/payments', icon: 'LucideCreditCard' })
+  }
+
+  // 5. Users & Roles: ONLY for admin; NEVER for restaurant owner or customer
   if (canAccessUsers.value) {
     items.push({ label: 'Users & Roles', path: '/users', icon: 'LucideUsers' })
   }

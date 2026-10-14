@@ -29,6 +29,7 @@ model User {
   restaurantStaff RestaurantStaff[]
   orders          Order[]
   passkeys        Passkey[]
+  payments        Payment[]
 
   @@index([email])
   @@index([phone])
@@ -152,6 +153,23 @@ enum OrderStatus {
   CANCELLED
 }
 
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  COMPLETED
+  FAILED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CASH_ON_DELIVERY
+  CARD
+  ONLINE
+  STRIPE
+  RAZORPAY
+  WALLET
+}
+
 model Restaurant {
   id          String   @id @default(cuid())
   name        String
@@ -169,6 +187,7 @@ model Restaurant {
   categories Category[]
   menuItems  MenuItem[]
   orders     Order[]
+  payments   Payment[]
 
   @@map("restaurants")
 }
@@ -269,6 +288,7 @@ model Order {
   restaurant      Restaurant  @relation(fields: [restaurantId], references: [id])
   address         Address?    @relation(fields: [addressId], references: [id], onDelete: SetNull)
   items           OrderItem[]
+  payment         Payment?
   createdAt       DateTime    @default(now())
   updatedAt       DateTime    @updatedAt
 
@@ -293,4 +313,30 @@ model OrderItem {
   @@index([menuItemId])
   @@map("order_items")
 }
+
+model Payment {
+  id              String        @id @default(cuid())
+  orderId         String        @unique
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  restaurantId    String
+  restaurant      Restaurant    @relation(fields: [restaurantId], references: [id])
+  amount          Decimal       @db.Decimal(10, 2)
+  currency        String        @default("USD")
+  status          PaymentStatus @default(PENDING)
+  method          PaymentMethod @default(CASH_ON_DELIVERY)
+  transactionId   String?       @unique
+  gatewayResponse Json?
+  refundReason    String?
+  refundedAt      DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  @@index([userId])
+  @@index([restaurantId])
+  @@index([status])
+  @@map("payments")
+}
+
 
