@@ -126,10 +126,11 @@
     </div>
 
     <!-- Address Modal (Add / Edit) -->
-    <div v-if="isModalOpen" class="fixed inset-0 z-50 flex items-center justify-center p-4 overflow-y-auto">
-      <div class="fixed inset-0 bg-black/80 backdrop-blur-md" @click="isModalOpen = false"></div>
+    <Teleport to="body">
+      <div v-if="isModalOpen" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 overflow-y-auto">
+        <div class="fixed inset-0 bg-black/80 backdrop-blur-md" @click="isModalOpen = false"></div>
 
-      <div class="relative w-full max-w-lg rounded-3xl glass-card border border-white/10 shadow-2xl p-6 space-y-5 z-10 my-8">
+        <div class="relative w-full max-w-lg rounded-3xl glass-card border border-white/10 shadow-2xl p-6 space-y-5 z-10 my-auto max-h-[85vh] overflow-y-auto">
         <div class="flex items-center justify-between border-b border-white/10 pb-4">
           <h3 class="text-base font-bold text-white flex items-center gap-2">
             <LucideMapPin class="w-4 h-4 text-indigo-400" />
@@ -282,6 +283,7 @@
         </form>
       </div>
     </div>
+  </Teleport>
   </div>
 </template>
 

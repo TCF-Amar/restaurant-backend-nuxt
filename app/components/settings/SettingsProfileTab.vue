@@ -8,7 +8,7 @@
     <!-- Avatar Section -->
     <div class="flex items-center gap-4">
       <div
-        class="w-16 h-16 rounded-2xl bg-gradient-to-tr from-indigo-600 to-pink-500 flex items-center justify-center text-4xl font-bold text-white shadow-lg ring-2 ring-white/20">
+        class="w-16 h-16 rounded-2xl  flex items-center justify-center text-4xl font-bold text-white shadow-lg ring-2 ring-white/20">
         <span v-if="profileForm.name">{{ profileForm.name.charAt(0).toUpperCase() }}</span>
         <LucideUser v-else class="w-8 h-8" />
       </div>

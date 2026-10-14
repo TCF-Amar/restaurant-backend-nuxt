@@ -4,11 +4,13 @@
     <div class="border-b border-white/[0.08] pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <h2 class="text-lg font-bold text-white">Password & Authentication</h2>
-        <p class="text-xs text-slate-400">Update your account credentials using your current password or verification code.</p>
+        <p class="text-xs text-slate-400">Update your account credentials using your current password or verification
+          code.</p>
       </div>
 
       <!-- Mode Selector Tabs -->
-      <div class="flex items-center gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs self-start sm:self-auto">
+      <div
+        class="flex items-center gap-1 p-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs self-start sm:self-auto">
         <button type="button" @click="passwordMode = 'current'" :class="[
           'px-3 py-1.5 rounded-lg font-medium transition cursor-pointer',
           passwordMode === 'current'
@@ -40,8 +42,7 @@
             Forgot current password?
           </button>
         </div>
-        <input v-model="passwordForm.currentPassword" type="password" required
-          placeholder="Enter current password"
+        <input v-model="passwordForm.currentPassword" type="password" required placeholder="Enter current password"
           class="w-full px-3.5 py-2.5 rounded-xl glass-input text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500/50" />
       </div>
 
@@ -214,8 +215,7 @@
             </div>
           </div>
 
-          <button type="button" @click="handleDeletePasskey(pk.id, pk.name)"
-            :disabled="deletingPasskeyId === pk.id"
+          <button type="button" @click="handleDeletePasskey(pk.id, pk.name)" :disabled="deletingPasskeyId === pk.id"
             class="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer"
             title="Remove passkey">
             <LucideLoader2 v-if="deletingPasskeyId === pk.id" class="w-4 h-4 animate-spin text-rose-400" />
@@ -229,10 +229,11 @@
     <!-- MODALS: 2FA Setup, 2FA Disable, Add Passkey -->
     <!-- ========================================== -->
     <!-- 2FA Setup Modal -->
-    <div v-if="show2faSetupModal"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-      <div
-        class="w-full max-w-md rounded-3xl glass-card p-6 border border-white/20 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
+    <Teleport to="body">
+      <div v-if="show2faSetupModal"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
+        <div
+          class="w-full max-w-md rounded-3xl glass-card p-6 border border-white/20 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200 my-auto max-h-[85vh] overflow-y-auto">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <div class="p-2 rounded-xl bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
@@ -300,12 +301,14 @@
         </div>
       </div>
     </div>
+  </Teleport>
 
     <!-- 2FA Disable Modal -->
-    <div v-if="show2faDisableModal"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-      <div
-        class="w-full max-w-md rounded-3xl glass-card p-6 border border-white/20 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+    <Teleport to="body">
+      <div v-if="show2faDisableModal"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
+        <div
+          class="w-full max-w-md rounded-3xl glass-card p-6 border border-white/20 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 my-auto max-h-[85vh] overflow-y-auto">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <div class="p-2 rounded-xl bg-rose-500/20 text-rose-300 border border-rose-500/30">
@@ -355,12 +358,14 @@
         </form>
       </div>
     </div>
+  </Teleport>
 
     <!-- Add Passkey Modal -->
-    <div v-if="showAddPasskeyModal"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-md">
-      <div
-        class="w-full max-w-md rounded-3xl glass-card p-6 border border-white/20 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200">
+    <Teleport to="body">
+      <div v-if="showAddPasskeyModal"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
+        <div
+          class="w-full max-w-md rounded-3xl glass-card p-6 border border-white/20 shadow-2xl space-y-4 animate-in fade-in zoom-in-95 duration-200 my-auto max-h-[85vh] overflow-y-auto">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <div class="p-2 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30">
@@ -390,7 +395,8 @@
           <div
             class="p-3 rounded-xl bg-purple-500/10 border border-purple-500/20 text-xs text-purple-200 flex items-center gap-2.5">
             <LucideShield class="w-4 h-4 text-purple-300 shrink-0" />
-            <span>When you click continue, your browser will prompt you to authenticate with your biometric sensor or PIN.</span>
+            <span>When you click continue, your browser will prompt you to authenticate with your biometric sensor or
+              PIN.</span>
           </div>
 
           <div class="flex items-center justify-end gap-2 pt-2">
@@ -407,6 +413,7 @@
         </form>
       </div>
     </div>
+  </Teleport>
   </div>
 </template>
 
@@ -475,7 +482,7 @@ async function handleSendSettingsOtp() {
       type: 'success',
       message: res.message || 'Verification code dispatched to your email.',
     })
-    })
+
     if (res.debugOtp) {
       otpDebugCode.value = res.debugOtp
     }

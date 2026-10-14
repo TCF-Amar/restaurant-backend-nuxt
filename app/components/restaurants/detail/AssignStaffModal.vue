@@ -1,10 +1,11 @@
 <template>
-  <transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
-    leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0">
-    <div v-if="show"
-      class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
-      <div
-        class="w-full max-w-lg rounded-3xl glass-card border border-white/20 p-6 sm:p-7 space-y-5 shadow-2xl relative">
+  <Teleport to="body">
+    <transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0"
+      leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0">
+      <div v-if="show"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md overflow-y-auto">
+        <div
+          class="w-full max-w-lg rounded-3xl glass-card border border-white/20 p-6 sm:p-7 space-y-5 shadow-2xl relative my-auto max-h-[85vh] overflow-y-auto">
         <div class="flex items-center justify-between">
           <div class="flex items-center gap-2.5">
             <div
@@ -74,6 +75,7 @@
       </div>
     </div>
   </transition>
+</Teleport>
 </template>
 
 <script setup lang="ts">

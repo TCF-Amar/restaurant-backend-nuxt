@@ -1,7 +1,7 @@
 <template>
-  <header class="fixed top-0 left-0 right-0 z-50 w-full glass-header select-none transition-colors">
+  <header class="fixed top-0 left-0 right-0 z-30 w-full glass-header select-none transition-colors">
     <!-- Ambient top glow line -->
-    <div class="h-[1px] w-full bg-gradient-to-r from-transparent via-indigo-500/60 to-transparent"></div>
+    <div class="h-px w-full bg-linear-to-r from-transparent via-indigo-500/60 to-transparent"></div>
 
     <div class="h-16 px-4 sm:px-6 flex items-center justify-between gap-4">
       <!-- Left: Sidebar toggle + Brand -->

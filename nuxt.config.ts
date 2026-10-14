@@ -6,6 +6,12 @@ export default defineNuxtConfig({
     'nuxt-lucide-icons',
     'nuxt-icons',
   ],
+  components: [
+    {
+      path: '~/components',
+      pathPrefix: false,
+    },
+  ],
   nitro: {
     imports: {
       dirs: ["server/utils/**"],
@@ -15,15 +21,15 @@ export default defineNuxtConfig({
     },
     openAPI: {
       meta: {
-        title: "API Documentation",
+        title: "Artisan Delivery & Multi-Tenant Restaurant Platform API",
         description:
-          "REST API for authentication, account sessions, profile management, and verification.",
+          "High-performance REST API powering the Flutter Mobile App (customer food ordering, address book, real-time checkout) and the Web Management Portal (admin oversight, kitchen pipeline, outlet staffing, and analytics).",
         version: "1.0.0",
       },
-      production: false,
+
       ui: {
         scalar: { route: "/docs" },
-        swagger: false,
+        swagger: { route: "/swagger" },
       },
     },
   },
@@ -34,7 +40,7 @@ export default defineNuxtConfig({
     plugins: [tailwindcss()],
     server: {
       allowedHosts: true,
-      
+
     }
   },
   plugins: [],
