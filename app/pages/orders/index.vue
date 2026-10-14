@@ -114,10 +114,12 @@ const isLoading = ref(true)
 const searchQuery = ref('')
 const selectedStatus = ref('ALL')
 
+const api = useApi()
+
 async function fetchOrders() {
   isLoading.value = true
   try {
-    const res = await $fetch<any>('/api/v1/dashboard/stats')
+    const res = await api.get<any>('/api/v1/dashboard/stats')
     orders.value = res?.recentOrders || []
   } catch (err) {
     orders.value = []

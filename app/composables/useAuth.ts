@@ -80,8 +80,8 @@ export const useAuth = () => {
       fetchingUser.value = true
       authError.value = null
 
-      // useRequestFetch forwards incoming cookies during SSR
-      const res = await useRequestFetch()<MeApiResponse>("/api/v1/auth/me")
+      const api = useApi()
+      const res = await api<MeApiResponse>("/api/v1/auth/me")
       user.value = res?.user ?? null
     } catch {
       user.value = null
@@ -94,7 +94,8 @@ export const useAuth = () => {
 
   async function logout(redirectPath = "/login") {
     try {
-      await $fetch("/api/v1/auth/logout", { method: "POST" })
+      const api = useApi()
+      await api.post("/api/v1/auth/logout")
     } catch (err) {
       console.warn("Logout error:", err)
     } finally {

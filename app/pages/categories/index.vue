@@ -418,10 +418,12 @@ const form = ref({
   restaurantId: '',
 })
 
+const api = useApi()
+
 async function loadCategories() {
   isLoading.value = true
   try {
-    const res = await $fetch<any>('/api/v1/admin/categories', {
+    const res = await api.get<any>('/api/v1/admin/categories', {
       params: {
         page: currentPage.value,
         limit: 10,
@@ -455,7 +457,7 @@ watch([selectedScope, searchQuery], () => {
 
 async function loadRestaurants() {
   try {
-    const res = await $fetch<any>('/api/v1/owner/restaurants', { params: { all: true } })
+    const res = await api.get<any>('/api/v1/owner/restaurants', { params: { all: true } })
     restaurantsList.value = res?.restaurants || []
   } catch {
     restaurantsList.value = []
@@ -509,10 +511,7 @@ async function saveCategory() {
     }
 
     if (isEditing.value && editingCategoryId.value) {
-      const res = await $fetch<any>(`/api/v1/admin/categories/${editingCategoryId.value}`, {
-        method: 'PUT',
-        body: payload,
-      })
+      const res = await api.put<any>(`/api/v1/admin/categories/${editingCategoryId.value}`, payload)
       if (res?.category) {
         showModal.value = false
         statusMessage.value = {
@@ -522,10 +521,7 @@ async function saveCategory() {
         await loadCategories()
       }
     } else {
-      const res = await $fetch<any>('/api/v1/admin/categories', {
-        method: 'POST',
-        body: payload,
-      })
+      const res = await api.post<any>('/api/v1/admin/categories', payload)
       if (res?.category) {
         showModal.value = false
         statusMessage.value = {
@@ -556,9 +552,7 @@ async function deleteCategory(cat: any) {
 
   isSubmitting.value = true
   try {
-    const res = await $fetch<any>(`/api/v1/admin/categories/${cat.id}?force=true`, {
-      method: 'DELETE',
-    })
+    const res = await api.delete<any>(`/api/v1/admin/categories/${cat.id}?force=true`)
     if (res?.status === 'ok') {
       statusMessage.value = {
         type: 'success',

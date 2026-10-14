@@ -1,15 +1,23 @@
 <template>
-  <div class="rounded-2xl glass-card p-5 border border-white/10 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between">
+  <div
+    @click="navigateTo(`/restaurants/${restaurant.id}`)"
+    class="rounded-2xl glass-card p-5 border border-white/10 hover:border-indigo-500/40 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between cursor-pointer shadow-lg"
+  >
     <div class="space-y-4">
       <!-- Top Row: Logo & Status Badge -->
       <div class="flex items-start justify-between gap-3">
         <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600/40 to-purple-600/40 border border-white/15 flex items-center justify-center text-lg font-bold text-white shadow-md">
+          <NuxtLink
+            :to="`/restaurants/${restaurant.id}`"
+            @click.stop
+            class="w-12 h-12 rounded-xl bg-gradient-to-tr from-indigo-600/40 to-purple-600/40 border border-white/15 flex items-center justify-center text-lg font-bold text-white shadow-md hover:scale-105 transition-transform shrink-0"
+          >
             <span>{{ restaurant.name.charAt(0).toUpperCase() }}</span>
-          </div>
+          </NuxtLink>
           <div>
             <NuxtLink
               :to="`/restaurants/${restaurant.id}`"
+              @click.stop
               class="text-sm font-bold text-white hover:text-indigo-200 transition-colors block"
             >
               {{ restaurant.name }}
@@ -20,7 +28,7 @@
 
         <!-- Interactive Status Badge / Toggle Button -->
         <button
-          @click="$emit('toggle-status', restaurant)"
+          @click.stop="$emit('toggle-status', restaurant)"
           type="button"
           :title="restaurant.isActive ? 'Click to deactivate outlet' : 'Click to activate outlet'"
           :class="[
@@ -71,19 +79,21 @@
     <div class="mt-4 pt-3 border-t border-white/[0.06] flex items-center justify-between gap-2">
       <NuxtLink
         :to="`/orders?restaurantId=${restaurant.id}`"
+        @click.stop
         class="text-xs font-semibold text-slate-300 hover:text-white flex items-center gap-1 transition"
       >
         <span>Live Feed</span>
         <LucideArrowUpRight class="w-3.5 h-3.5" />
       </NuxtLink>
 
-      <button
-        @click="$emit('manage', restaurant.id)"
-        type="button"
-        class="px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-white text-xs font-medium transition cursor-pointer"
+      <NuxtLink
+        :to="`/restaurants/${restaurant.id}`"
+        @click.stop="$emit('manage', restaurant.id)"
+        class="px-3.5 py-1.5 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 hover:border-indigo-400/60 text-indigo-200 hover:text-white text-xs font-semibold transition cursor-pointer flex items-center gap-1.5 shadow-sm"
       >
-        Manage Outlet
-      </button>
+        <span>Manage Outlet</span>
+        <LucideArrowRight class="w-3.5 h-3.5" />
+      </NuxtLink>
     </div>
   </div>
 </template>
@@ -97,6 +107,8 @@ export interface RestaurantItem {
   description?: string | null
   address?: string | null
   phone?: string | null
+  logoUrl?: string | null
+  bannerUrl?: string | null
   _count?: {
     categories?: number
     menuItems?: number

@@ -44,11 +44,12 @@
 </template>
 
 <script setup lang="ts">
+const api = useApi()
 const stats = ref<any>(null)
 
 onMounted(async () => {
   try {
-    stats.value = await $fetch('/api/v1/dashboard/stats')
+    stats.value = await api.get('/api/v1/dashboard/stats')
   } catch (err) {
     // ignore
   }

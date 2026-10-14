@@ -22,14 +22,8 @@
       </div>
 
       <!-- Pagination Component -->
-      <AppPagination
-        :page="pagination.page"
-        :total-pages="pagination.totalPages"
-        :total="pagination.total"
-        :limit="pagination.limit"
-        :loading="isLoading"
-        @change="onPageChange"
-      />
+      <AppPagination :page="pagination.page" :total-pages="pagination.totalPages" :total="pagination.total"
+        :limit="pagination.limit" :loading="isLoading" @change="onPageChange" />
     </div>
 
     <!-- Empty State -->
@@ -48,11 +42,8 @@
 </template>
 
 <script setup lang="ts">
-import RestaurantHero from '~/components/restaurants/RestaurantHero.vue'
-import RestaurantFilters from '~/components/restaurants/RestaurantFilters.vue'
-import RestaurantCard, { type RestaurantItem } from '~/components/restaurants/RestaurantCard.vue'
-import RestaurantCreateModal from '~/components/restaurants/RestaurantCreateModal.vue'
-import AppPagination from '~/components/AppPagination.vue'
+import type { RestaurantItem } from '~/components/restaurants/RestaurantCard.vue'
+
 
 const { user } = useAuth()
 
@@ -69,11 +60,13 @@ const pagination = ref({
   totalPages: 1,
 })
 
+const api = useApi()
+
 // Fetch restaurants strictly from database API
 async function loadRestaurants() {
   isLoading.value = true
   try {
-    const res = await $fetch<any>('/api/v1/owner/restaurants', {
+    const res = await api.get<any>('/api/v1/owner/restaurants', {
       params: {
         page: currentPage.value,
         limit: 9,
@@ -106,15 +99,15 @@ function handleRestaurantCreated(newOutlet: RestaurantItem) {
   restaurantsList.value.unshift(newOutlet)
 }
 
-function handleManageOutlet(outletId: string) {
-  navigateTo(`/restaurants/${outletId}`)
+async function handleManageOutlet(outletId: string) {
+  if (!outletId) return
+  await navigateTo(`/restaurants/${outletId}`)
 }
 
 async function handleToggleStatus(restaurant: RestaurantItem) {
   try {
-    const res = await $fetch<{ status: string; restaurant: any }>(
-      `/api/v1/owner/restaurants/${restaurant.id}/status`,
-      { method: 'PATCH' }
+    const res = await api.patch<{ status: string; restaurant: any }>(
+      `/api/v1/owner/restaurants/${restaurant.id}/status`
     )
     if (res?.restaurant) {
       restaurant.isActive = res.restaurant.isActive

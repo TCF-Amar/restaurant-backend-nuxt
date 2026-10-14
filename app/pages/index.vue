@@ -62,8 +62,11 @@
     <!-- Live Glass KPI Cards Grid (Real Database Data) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
       <!-- Total Restaurants Card -->
-      <div class="rounded-2xl glass-card p-5 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1">
-        <div class="absolute -top-12 -right-12 w-28 h-28 rounded-full bg-indigo-500/20 blur-2xl group-hover:opacity-100 opacity-50 transition-opacity pointer-events-none"></div>
+      <div
+        class="rounded-2xl glass-card p-5 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1">
+        <div
+          class="absolute -top-12 -right-12 w-28 h-28 rounded-full bg-indigo-500/20 blur-2xl group-hover:opacity-100 opacity-50 transition-opacity pointer-events-none">
+        </div>
         <div class="flex items-center justify-between mb-3">
           <span class="text-xs font-medium text-slate-400">Total Outlets</span>
           <div class="p-2.5 rounded-xl bg-indigo-500/20 border border-indigo-500/30 text-white shadow-md">
@@ -80,8 +83,11 @@
       </div>
 
       <!-- Total Orders Card -->
-      <div class="rounded-2xl glass-card p-5 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1">
-        <div class="absolute -top-12 -right-12 w-28 h-28 rounded-full bg-purple-500/20 blur-2xl group-hover:opacity-100 opacity-50 transition-opacity pointer-events-none"></div>
+      <div
+        class="rounded-2xl glass-card p-5 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1">
+        <div
+          class="absolute -top-12 -right-12 w-28 h-28 rounded-full bg-purple-500/20 blur-2xl group-hover:opacity-100 opacity-50 transition-opacity pointer-events-none">
+        </div>
         <div class="flex items-center justify-between mb-3">
           <span class="text-xs font-medium text-slate-400">Total Orders</span>
           <div class="p-2.5 rounded-xl bg-purple-500/20 border border-purple-500/30 text-white shadow-md">
@@ -96,8 +102,11 @@
       </div>
 
       <!-- Total Revenue Card -->
-      <div class="rounded-2xl glass-card p-5 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1">
-        <div class="absolute -top-12 -right-12 w-28 h-28 rounded-full bg-emerald-500/20 blur-2xl group-hover:opacity-100 opacity-50 transition-opacity pointer-events-none"></div>
+      <div
+        class="rounded-2xl glass-card p-5 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1">
+        <div
+          class="absolute -top-12 -right-12 w-28 h-28 rounded-full bg-emerald-500/20 blur-2xl group-hover:opacity-100 opacity-50 transition-opacity pointer-events-none">
+        </div>
         <div class="flex items-center justify-between mb-3">
           <span class="text-xs font-medium text-slate-400">Gross Revenue</span>
           <div class="p-2.5 rounded-xl bg-emerald-500/20 border border-emerald-500/30 text-white shadow-md">
@@ -112,8 +121,11 @@
       </div>
 
       <!-- Total Users Card -->
-      <div class="rounded-2xl glass-card p-5 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1">
-        <div class="absolute -top-12 -right-12 w-28 h-28 rounded-full bg-cyan-500/20 blur-2xl group-hover:opacity-100 opacity-50 transition-opacity pointer-events-none"></div>
+      <div
+        class="rounded-2xl glass-card p-5 relative overflow-hidden group transition-all duration-300 hover:-translate-y-1">
+        <div
+          class="absolute -top-12 -right-12 w-28 h-28 rounded-full bg-cyan-500/20 blur-2xl group-hover:opacity-100 opacity-50 transition-opacity pointer-events-none">
+        </div>
         <div class="flex items-center justify-between mb-3">
           <span class="text-xs font-medium text-slate-400">Registered Users</span>
           <div class="p-2.5 rounded-xl bg-cyan-500/20 border border-cyan-500/30 text-white shadow-md">
@@ -143,7 +155,9 @@
             </div>
           </div>
 
-          <button @click="fetchDashboardStats" type="button" class="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition cursor-pointer" title="Refresh">
+          <button @click="fetchDashboardStats" type="button"
+            class="p-1.5 rounded-lg text-slate-400 hover:text-white bg-white/[0.04] hover:bg-white/[0.08] transition cursor-pointer"
+            title="Refresh">
             <LucideRotateCcw class="w-3.5 h-3.5" :class="{ 'animate-spin': isLoading }" />
           </button>
         </div>
@@ -162,12 +176,14 @@
             </thead>
             <tbody class="divide-y divide-white/[0.05]">
               <tr v-for="order in recentOrders" :key="order.id" class="hover:bg-white/[0.03] transition">
-                <td class="py-3 font-mono text-indigo-300 font-medium">#{{ order.orderNumber || order.id.slice(-6) }}</td>
+                <td class="py-3 font-mono text-indigo-300 font-medium">#{{ order.orderNumber || order.id.slice(-6) }}
+                </td>
                 <td class="py-3 text-slate-200 font-medium">{{ order.user?.name || order.user?.email || 'Guest' }}</td>
                 <td class="py-3 text-slate-300">{{ order.restaurant?.name || 'N/A' }}</td>
                 <td class="py-3 font-semibold text-white">${{ Number(order.totalAmount).toFixed(2) }}</td>
                 <td class="py-3">
-                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border bg-indigo-500/10 border-indigo-500/30 text-indigo-300">
+                  <span
+                    class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border bg-indigo-500/10 border-indigo-500/30 text-indigo-300">
                     <span class="w-1.5 h-1.5 rounded-full bg-indigo-400"></span>
                     {{ order.status }}
                   </span>
@@ -179,7 +195,8 @@
 
         <!-- Real Empty State (When no orders in database) -->
         <div v-else class="py-12 text-center space-y-3">
-          <div class="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center mx-auto text-slate-500">
+          <div
+            class="w-12 h-12 rounded-2xl bg-white/[0.03] border border-white/10 flex items-center justify-center mx-auto text-slate-500">
             <LucideInbox class="w-6 h-6" />
           </div>
           <div class="space-y-1">
@@ -189,7 +206,8 @@
             </p>
           </div>
           <div class="pt-2">
-            <NuxtLink to="/restaurants" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs text-slate-200 transition">
+            <NuxtLink to="/restaurants"
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-xs text-slate-200 transition">
               <LucideStore class="w-3.5 h-3.5 text-indigo-400" />
               <span>Explore Outlets</span>
             </NuxtLink>
@@ -212,12 +230,14 @@
 
           <!-- Outlets List (Real database data) -->
           <div v-if="recentRestaurants.length > 0" class="space-y-2">
-            <div v-for="outlet in recentRestaurants" :key="outlet.id" class="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-between">
+            <div v-for="outlet in recentRestaurants" :key="outlet.id"
+              class="p-3 rounded-xl bg-white/[0.02] border border-white/[0.05] flex items-center justify-between">
               <div class="space-y-0.5 truncate">
                 <p class="text-xs font-semibold text-white truncate">{{ outlet.name }}</p>
                 <p class="text-[10px] text-slate-400 font-mono">@{{ outlet.slug }}</p>
               </div>
-              <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
+              <span
+                class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
                 {{ outlet._count?.menuItems || 0 }} items
               </span>
             </div>
@@ -227,7 +247,8 @@
           <div v-else class="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] text-center space-y-2 text-xs">
             <p class="text-slate-300 font-medium">No Outlets Created</p>
             <p class="text-[11px] text-slate-500">Register your first restaurant outlet to begin accepting orders.</p>
-            <NuxtLink to="/restaurants" class="inline-block mt-1 text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
+            <NuxtLink to="/restaurants"
+              class="inline-block mt-1 text-xs text-indigo-400 hover:text-indigo-300 underline underline-offset-2">
               Create Restaurant &rarr;
             </NuxtLink>
           </div>
@@ -267,10 +288,12 @@ const metrics = reactive({
 const recentOrders = ref<any[]>([])
 const recentRestaurants = ref<any[]>([])
 
+const api = useApi()
+
 async function fetchDashboardStats() {
   isLoading.value = true
   try {
-    const res = await $fetch<any>('/api/v1/dashboard/stats')
+    const res = await api.get<any>('/api/v1/dashboard/stats')
     if (res?.metrics) {
       metrics.totalRestaurants = res.metrics.totalRestaurants || 0
       metrics.activeRestaurants = res.metrics.activeRestaurants || 0
