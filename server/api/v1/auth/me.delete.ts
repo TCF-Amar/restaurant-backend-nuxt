@@ -28,19 +28,28 @@ defineRouteMeta({
 export default defineEventHandler(async (event) => {
   const claims = requireAuth(event)
 
-  // Prisma schema has onDelete: Cascade, so deleting User deletes all their Sessions, Profile, and Addresses
-  await prisma.user.delete({
-    where: { id: claims.sub },
-  })
+  try {
+    // Prisma schema has onDelete: Cascade for Sessions, Profile, Addresses, Cart, Orders, Payments, OAuthAccounts, Passkeys, and RestaurantStaff
+    await prisma.user.delete({
+      where: { id: claims.sub },
+    })
 
-  // Invalidate Redis session cache
-  await invalidateSessionCache(claims.sid)
+    // Invalidate Redis session cache
+    await invalidateSessionCache(claims.sid)
 
-  // Clear auth cookies
-  clearAuthCookies(event)
+    // Clear auth cookies
+    clearAuthCookies(event)
 
-  return {
-    status: "ok",
-    message: "Account and all associated session data deleted successfully",
+    return {
+      status: "ok",
+      message: "Account and all associated session data deleted successfully",
+    }
+  } catch (error: any) {
+    console.error("[Auth:DeleteAccount] Error deleting user account:", error)
+    throw createError({
+      statusCode: 500,
+      statusMessage: "Internal Server Error",
+      message: error?.message || "Failed to delete account",
+    })
   }
 })

@@ -7,25 +7,25 @@ datasource db {
 }
 
 model User {
-  id              String    @id @default(cuid())
-  name            String
-  email           String?   @unique
-  phone           String?   @unique
-  password        String?
-  googleId        String?   @unique
-  emailVerifiedAt DateTime?
-  phoneVerifiedAt DateTime?
-  role            UserRole  @default(CUSTOMER)
-  isSuspended     Boolean   @default(false)
-  twoFactorEnabled Boolean  @default(false)
+  id               String    @id @default(cuid())
+  name             String
+  email            String?   @unique
+  phone            String?   @unique
+  password         String?
+  googleId         String?   @unique
+  emailVerifiedAt  DateTime?
+  phoneVerifiedAt  DateTime?
+  role             UserRole  @default(CUSTOMER)
+  isSuspended      Boolean   @default(false)
+  twoFactorEnabled Boolean   @default(false)
   twoFactorSecret  String?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  sessions Session[]
-  profile  Profile?
-  accounts OAuthAccount[]
+  sessions        Session[]
+  profile         Profile?
+  accounts        OAuthAccount[]
   restaurantStaff RestaurantStaff[]
   orders          Order[]
   passkeys        Passkey[]
@@ -39,17 +39,17 @@ model User {
 }
 
 model Passkey {
-  id           String   @id @default(cuid())
+  id           String    @id @default(cuid())
   userId       String
-  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name         String   @default("Passkey")
-  credentialId String   @unique
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name         String    @default("Passkey")
+  credentialId String    @unique
   publicKey    Bytes
-  counter      BigInt   @default(0)
-  deviceType   String   @default("singleDevice")
-  backedUp     Boolean  @default(false)
-  transports   String[] @default([])
-  createdAt    DateTime @default(now())
+  counter      BigInt    @default(0)
+  deviceType   String    @default("singleDevice")
+  backedUp     Boolean   @default(false)
+  transports   String[]  @default([])
+  createdAt    DateTime  @default(now())
   lastUsedAt   DateTime?
 
   @@index([userId])
@@ -300,7 +300,7 @@ model Order {
   deliveryAddress Json?
   userId          String
   restaurantId    String
-  user            User        @relation(fields: [userId], references: [id])
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
   restaurant      Restaurant  @relation(fields: [restaurantId], references: [id])
   address         Address?    @relation(fields: [addressId], references: [id], onDelete: SetNull)
   items           OrderItem[]
@@ -335,7 +335,7 @@ model Payment {
   orderId          String         @unique
   order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
   userId           String
-  user             User           @relation(fields: [userId], references: [id])
+  user             User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   restaurantId     String
   restaurant       Restaurant     @relation(fields: [restaurantId], references: [id])
   amount           Decimal        @db.Decimal(10, 2)
@@ -405,5 +405,3 @@ model CartItem {
   @@index([menuItemId])
   @@map("cart_items")
 }
-
-
