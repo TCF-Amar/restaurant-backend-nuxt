@@ -182,7 +182,8 @@ export default defineEventHandler(async (event) => {
         amount: orderAmount,
         currency: selectedCurrency,
         orderId: order.id,
-        customerEmail: order.user?.email,
+
+        customerEmail: order.user?.email || undefined,
         metadata: {
           orderId: order.id,
           userId: order.userId,

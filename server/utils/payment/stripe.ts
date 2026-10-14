@@ -27,7 +27,7 @@ export interface CreateStripePaymentIntentOptions {
   amount: number // in major unit (e.g. 25.50 USD)
   currency?: string // default "USD"
   orderId: string
-  customerEmail?: string
+  customerEmail?: string | null
   metadata?: Record<string, string>
 }
 
@@ -51,7 +51,7 @@ export async function createStripePaymentIntent(options: CreateStripePaymentInte
       orderId: options.orderId,
       ...(options.metadata || {}),
     },
-    receipt_email: options.customerEmail,
+    receipt_email: options.customerEmail || undefined,
   })
 
   return paymentIntent
