@@ -89,7 +89,7 @@
                   class="pointer-events-none fixed left-[86px] z-50 hidden group-hover:flex items-center px-2.5 py-1.5 rounded-lg glass-panel text-xs text-white shadow-xl whitespace-nowrap border border-white/10">
                   <span>{{ item.label }}</span>
                   <span v-if="item.badge"
-                    class="ml-2 text-[10px] px-1 py-0.2 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                    class="ml-2 text-[10px] px-1 py-0.5 rounded bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
                     {{ item.badge }}
                   </span>
                 </div>
@@ -129,7 +129,7 @@
                   class="pointer-events-none fixed left-[86px] z-50 hidden group-hover:flex items-center px-2.5 py-1.5 rounded-lg glass-panel text-xs text-white shadow-xl whitespace-nowrap border border-white/10">
                   <span>{{ item.label }}</span>
                   <span v-if="item.badge"
-                    class="ml-2 text-[10px] px-1 py-0.2 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
+                    class="ml-2 text-[10px] px-1 py-0.5 rounded bg-purple-500/20 text-purple-300 border border-purple-500/30">
                     {{ item.badge }}
                   </span>
                 </div>
@@ -223,8 +223,8 @@
 
         <!-- Floating Width Tooltip while dragging -->
         <div v-if="isDragging"
-          class="absolute top-1/2 -translate-y-1/2 left-4 pointer-events-none px-2 py-1 rounded-md bg-indigo-600/90 text-white font-mono text-[10px] shadow-lg  whitespace-nowrap z-50 border border-white/20">
-          {{ Math.round(sidebarWidth) }}px
+          class="absolute top-1/2 -translate-y-1/2 left-4 pointer-events-none px-2 py-1 rounded-md bg-indigo-600/90 text-white font-mono text-[10px] shadow-lg whitespace-nowrap z-50 border border-white/20">
+          {{ Math.round(Number(sidebarWidth)) }}px
         </div>
       </div>
     </aside>
@@ -232,16 +232,13 @@
 </template>
 
 <script setup lang="ts">
-import {
-  LucideLayoutDashboard,
-  LucideBarChart3,
-  LucideUtensils,
-  LucideFolderTree,
-  LucideShoppingBag,
-  LucideUsers,
-  LucideBookOpen,
-  LucideSettings,
-} from '#components'
+interface NavItem {
+  label: string
+  path: string
+  icon: string
+  badge?: string
+  target?: string
+}
 
 const route = useRoute()
 const {
@@ -281,53 +278,53 @@ function isActiveRoute(path: string) {
 }
 
 // Navigation structure dynamically tailored to user role and permissions
-const coreNavItems = computed(() => {
-  const items = [
-    { label: 'Dashboard', path: '/', icon: LucideLayoutDashboard },
+const coreNavItems = computed<NavItem[]>(() => {
+  const items: NavItem[] = [
+    { label: 'Dashboard', path: '/', icon: 'LucideLayoutDashboard' },
   ]
   // Analytics available for admins and restaurant owners
   if (isSuperAdmin.value || canAccessRestaurants.value) {
-    items.push({ label: 'Analytics', path: '/analytics', icon: LucideBarChart3, badge: 'Live' })
+    items.push({ label: 'Analytics', path: '/analytics', icon: 'LucideBarChart3', badge: 'Live' })
   }
   return items
 })
 
-const managementNavItems = computed(() => {
-  const items = []
+const managementNavItems = computed<NavItem[]>(() => {
+  const items: NavItem[] = []
 
   // 1. Restaurants: shown if admin OR if owner has assigned outlets
   if (canAccessRestaurants.value) {
-    items.push({ label: 'Restaurants', path: '/restaurants', icon: LucideUtensils })
+    items.push({ label: 'Restaurants', path: '/restaurants', icon: 'LucideUtensils' })
   }
 
   // 2. Categories: shown if admin OR if owner has MANAGE_CATEGORIES permission
   if (canAccessCategories.value) {
-    items.push({ label: 'Categories', path: '/categories', icon: LucideFolderTree })
+    items.push({ label: 'Categories', path: '/categories', icon: 'LucideFolderTree' })
   }
 
   // 3. Orders: shown if admin OR if owner has MANAGE_ORDERS permission OR customer
   if (canAccessOrders.value) {
-    items.push({ label: 'Orders Feed', path: '/orders', icon: LucideShoppingBag })
+    items.push({ label: 'Orders Feed', path: '/orders', icon: 'LucideShoppingBag' })
   }
 
   // 4. Users & Roles: ONLY for admin; NEVER for restaurant owner or customer
   if (canAccessUsers.value) {
-    items.push({ label: 'Users & Roles', path: '/users', icon: LucideUsers })
+    items.push({ label: 'Users & Roles', path: '/users', icon: 'LucideUsers' })
   }
 
   return items
 })
 
-const systemNavItems = computed(() => {
-  const items = []
+const systemNavItems = computed<NavItem[]>(() => {
+  const items: NavItem[] = []
 
   // API Scalar Docs: ONLY for admin; NEVER for restaurant owner or customer
   if (canAccessDocs.value) {
-    items.push({ label: 'API Scalar Docs', path: '/docs', icon: LucideBookOpen, target: '_blank', badge: 'v1' })
+    items.push({ label: 'API Scalar Docs', path: '/docs', icon: 'LucideBookOpen', target: '_blank', badge: 'v1' })
   }
 
   // Settings: accessible to all authenticated accounts
-  items.push({ label: 'Settings', path: '/settings', icon: LucideSettings })
+  items.push({ label: 'Settings', path: '/settings', icon: 'LucideSettings' })
 
   return items
 })
