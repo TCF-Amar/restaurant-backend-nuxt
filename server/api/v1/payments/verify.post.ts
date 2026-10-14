@@ -176,7 +176,6 @@ export default defineEventHandler(async (event) => {
         where: { id: order.id },
         data: {
           status: (order.status === "PAYMENT_PENDING" || order.status === "PENDING") ? "ACCEPTED" : order.status,
-          paymentStatus: "PAID",
         },
       }),
       prisma.cartItem.deleteMany({
@@ -191,7 +190,6 @@ export default defineEventHandler(async (event) => {
       order: {
         id: updatedOrder.id,
         status: updatedOrder.status,
-        paymentStatus: updatedOrder.paymentStatus,
       },
     }
   }
@@ -250,7 +248,6 @@ export default defineEventHandler(async (event) => {
           where: { id: order.id },
           data: {
             status: (order.status === "PAYMENT_PENDING" || order.status === "PENDING") ? "ACCEPTED" : order.status,
-            paymentStatus: "PAID",
           },
         }),
         prisma.cartItem.deleteMany({
@@ -265,7 +262,6 @@ export default defineEventHandler(async (event) => {
         order: {
           id: updatedOrder.id,
           status: updatedOrder.status,
-          paymentStatus: updatedOrder.paymentStatus,
         },
       }
     } catch (err: any) {
