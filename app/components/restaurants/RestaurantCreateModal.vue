@@ -4,9 +4,9 @@
       enter-to-class="opacity-100 scale-100" leave-active-class="transition duration-150 ease-in"
       leave-from-class="opacity-100 scale-100" leave-to-class="opacity-0 scale-95">
       <div v-if="isOpen"
-        class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/70 backdrop-blur-sm overflow-y-auto">
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/10 backdrop-blur-sm overflow-y-auto">
         <div
-          class="w-full max-w-md rounded-3xl glass-panel p-6 sm:p-8 border border-white/15 space-y-5 shadow-2xl relative my-auto">
+          class="w-full max-w-md rounded-3xl glass-panel p-6 sm:p-8 border border-white/10 space-y-5 shadow-2xl relative my-auto">
           <!-- Close Button -->
           <button @click="$emit('close')" type="button"
             class="absolute top-5 right-5 text-slate-400 hover:text-white transition cursor-pointer">
