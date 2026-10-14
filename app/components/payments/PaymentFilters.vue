@@ -41,6 +41,7 @@
         <option value="ALL" class="bg-slate-900 text-slate-400">All Methods</option>
         <option value="CASH_ON_DELIVERY" class="bg-slate-900 text-white">Cash on Delivery</option>
         <option value="CARD" class="bg-slate-900 text-white">Card</option>
+        <option value="UPI" class="bg-slate-900 text-white">UPI Instant</option>
         <option value="ONLINE" class="bg-slate-900 text-white">Online Gateway</option>
         <option value="STRIPE" class="bg-slate-900 text-white">Stripe</option>
         <option value="RAZORPAY" class="bg-slate-900 text-white">Razorpay</option>

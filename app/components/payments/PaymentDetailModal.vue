@@ -38,6 +38,14 @@
                 <span class="text-slate-400 text-[11px] block">Order Number</span>
                 <span class="font-mono text-indigo-300">{{ payment.order?.orderNumber }}</span>
               </div>
+              <div>
+                <span class="text-slate-400 text-[11px] block">Settlement Gateway</span>
+                <span class="font-semibold text-purple-300">{{ payment.gateway || payment.method }}</span>
+              </div>
+              <div>
+                <span class="text-slate-400 text-[11px] block">Currency</span>
+                <span class="font-semibold text-slate-300">{{ payment.currency }}</span>
+              </div>
             </div>
 
             <!-- Customer info -->
@@ -45,6 +53,23 @@
               <span class="text-slate-400 text-[11px] block font-semibold uppercase">Customer Info</span>
               <p class="text-white font-medium">{{ payment.user?.name || 'Customer' }}</p>
               <p class="text-slate-400">{{ payment.user?.email || payment.user?.phone || 'No contact provided' }}</p>
+            </div>
+
+            <!-- Gateway & Transaction Audit Trail -->
+            <div v-if="payment.transactionId || payment.gatewayOrderId || payment.gatewayPaymentId" class="p-3.5 rounded-2xl bg-white/[0.03] border border-white/10 space-y-1.5 font-mono text-[11px]">
+              <span class="text-slate-400 text-[10px] block font-sans font-semibold uppercase">Gateway Audit Trail</span>
+              <div v-if="payment.transactionId" class="flex justify-between items-center text-slate-300">
+                <span class="text-slate-500 font-sans">Transaction Ref:</span>
+                <span class="text-indigo-200">{{ payment.transactionId }}</span>
+              </div>
+              <div v-if="payment.gatewayOrderId" class="flex justify-between items-center text-slate-300">
+                <span class="text-slate-500 font-sans">Gateway Order:</span>
+                <span class="text-amber-200">{{ payment.gatewayOrderId }}</span>
+              </div>
+              <div v-if="payment.gatewayPaymentId" class="flex justify-between items-center text-slate-300">
+                <span class="text-slate-500 font-sans">Gateway Payment:</span>
+                <span class="text-emerald-200">{{ payment.gatewayPaymentId }}</span>
+              </div>
             </div>
 
             <!-- Refund reason if refunded -->
@@ -178,6 +203,8 @@ function formatMethod(method: string) {
       return 'Razorpay'
     case 'ONLINE':
       return 'Online Gateway'
+    case 'UPI':
+      return 'UPI Instant'
     case 'CARD':
       return 'Debit / Credit Card'
     case 'WALLET':

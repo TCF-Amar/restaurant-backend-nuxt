@@ -170,6 +170,13 @@ enum PaymentMethod {
   WALLET
 }
 
+enum PaymentGateway {
+  RAZORPAY
+  STRIPE
+  CASH_ON_DELIVERY
+  WALLET
+}
+
 model Restaurant {
   id          String   @id @default(cuid())
   name        String
@@ -315,28 +322,48 @@ model OrderItem {
 }
 
 model Payment {
-  id              String        @id @default(cuid())
-  orderId         String        @unique
-  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
-  userId          String
-  user            User          @relation(fields: [userId], references: [id])
-  restaurantId    String
-  restaurant      Restaurant    @relation(fields: [restaurantId], references: [id])
-  amount          Decimal       @db.Decimal(10, 2)
-  currency        String        @default("USD")
-  status          PaymentStatus @default(PENDING)
-  method          PaymentMethod @default(CASH_ON_DELIVERY)
-  transactionId   String?       @unique
-  gatewayResponse Json?
-  refundReason    String?
-  refundedAt      DateTime?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
+  id               String         @id @default(cuid())
+  orderId          String         @unique
+  order            Order          @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  userId           String
+  user             User           @relation(fields: [userId], references: [id])
+  restaurantId     String
+  restaurant       Restaurant     @relation(fields: [restaurantId], references: [id])
+  amount           Decimal        @db.Decimal(10, 2)
+  currency         String         @default("USD")
+  status           PaymentStatus  @default(PENDING)
+  method           PaymentMethod  @default(CASH_ON_DELIVERY)
+  gateway          PaymentGateway @default(CASH_ON_DELIVERY)
+  gatewayOrderId   String?
+  gatewayPaymentId String?
+  gatewaySignature String?
+  clientSecret     String?
+  transactionId    String?        @unique
+  gatewayResponse  Json?
+  refundReason     String?
+  refundedAt       DateTime?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
 
   @@index([userId])
   @@index([restaurantId])
   @@index([status])
+  @@index([gatewayOrderId])
+  @@index([gatewayPaymentId])
   @@map("payments")
+}
+
+model PaymentWebhookLog {
+  id        String         @id @default(cuid())
+  gateway   PaymentGateway
+  eventId   String?        @unique
+  eventType String
+  payload   Json
+  processed Boolean        @default(false)
+  error     String?
+  createdAt DateTime       @default(now())
+
+  @@map("payment_webhook_logs")
 }
 
 

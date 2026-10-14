@@ -96,7 +96,7 @@ const createOrderSchema = z.object({
     .nullable(),
   notes: z.string().optional().nullable(),
   paymentMethod: z
-    .enum(["CASH_ON_DELIVERY", "CARD", "UPI", "WALLET"])
+    .enum(["CASH_ON_DELIVERY", "CARD", "UPI", "WALLET", "STRIPE", "RAZORPAY", "ONLINE"])
     .optional()
     .default("CASH_ON_DELIVERY"),
   items: z
@@ -321,10 +321,15 @@ export default defineEventHandler(async (event) => {
             userId: claims.sub,
             restaurantId,
             amount: totalOrderAmount,
-            currency: "USD",
-            status: paymentMethod === "CASH_ON_DELIVERY" ? "PENDING" : "COMPLETED",
+            currency: ["UPI", "RAZORPAY"].includes(paymentMethod) ? "INR" : "USD",
+            status: "PENDING",
             method: (["CASH_ON_DELIVERY", "CARD", "ONLINE", "STRIPE", "RAZORPAY", "WALLET"].includes(paymentMethod)
               ? paymentMethod
+              : "CASH_ON_DELIVERY") as any,
+            gateway: (paymentMethod === "RAZORPAY" || paymentMethod === "UPI"
+              ? "RAZORPAY"
+              : paymentMethod === "STRIPE" || paymentMethod === "CARD"
+              ? "STRIPE"
               : "CASH_ON_DELIVERY") as any,
             transactionId: `TXN-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).substring(2, 6).toUpperCase()}`,
           },

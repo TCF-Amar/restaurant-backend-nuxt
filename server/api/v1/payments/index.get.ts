@@ -94,6 +94,8 @@ export default defineEventHandler(async (event) => {
   if (search) {
     where.OR = [
       { transactionId: { contains: search, mode: "insensitive" } },
+      { gatewayOrderId: { contains: search, mode: "insensitive" } },
+      { gatewayPaymentId: { contains: search, mode: "insensitive" } },
       { order: { orderNumber: { contains: search, mode: "insensitive" } } },
       { user: { name: { contains: search, mode: "insensitive" } } },
       { user: { email: { contains: search, mode: "insensitive" } } },

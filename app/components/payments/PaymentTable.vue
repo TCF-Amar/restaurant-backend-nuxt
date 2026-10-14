@@ -60,13 +60,19 @@
                 <p class="text-[11px] text-slate-400 truncate max-w-[140px]">{{ item.user?.email || item.user?.phone || '—' }}</p>
               </td>
 
-              <!-- Method -->
+              <!-- Method & Gateway -->
               <td class="py-3">
-                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/[0.05] border border-white/10 text-slate-300">
-                  <LucideCoins v-if="item.method === 'CASH_ON_DELIVERY'" class="w-3 h-3 text-amber-400" />
-                  <LucideCreditCard v-else class="w-3 h-3 text-indigo-400" />
-                  <span>{{ formatMethod(item.method) }}</span>
-                </span>
+                <div class="flex flex-col gap-0.5">
+                  <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium bg-white/[0.05] border border-white/10 text-slate-300 w-fit">
+                    <LucideCoins v-if="item.method === 'CASH_ON_DELIVERY'" class="w-3 h-3 text-amber-400" />
+                    <LucideQrCode v-else-if="item.method === 'UPI' || item.gateway === 'RAZORPAY'" class="w-3 h-3 text-purple-400" />
+                    <LucideCreditCard v-else class="w-3 h-3 text-indigo-400" />
+                    <span>{{ formatMethod(item.method) }}</span>
+                  </span>
+                  <span v-if="item.gateway && item.gateway !== 'CASH_ON_DELIVERY'" class="text-[9px] text-slate-500 font-mono px-1">
+                    via {{ item.gateway }}
+                  </span>
+                </div>
               </td>
 
               <!-- Amount -->
@@ -170,6 +176,8 @@ function formatMethod(method: string) {
       return 'Razorpay'
     case 'ONLINE':
       return 'Online Gateway'
+    case 'UPI':
+      return 'UPI Instant'
     case 'CARD':
       return 'Debit / Credit Card'
     case 'WALLET':
