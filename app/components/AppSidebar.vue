@@ -72,7 +72,7 @@
                   class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,1)]"></span>
 
                 <!-- Icon -->
-                <component :is="item.icon" class="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
+                <AppSidebarIcon :name="item.icon" class-names="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
                   :class="isActiveRoute(item.path) ? 'text-indigo-300' : 'text-slate-400 group-hover:text-slate-200'" />
 
                 <!-- Label & Badge (Shown only when open) -->
@@ -113,7 +113,8 @@
                   ? 'bg-gradient-to-r from-indigo-500/25 to-purple-500/15 text-white border border-indigo-500/40 shadow-[0_0_16px_rgba(99,102,241,0.25)]'
                   : 'text-slate-300 hover:text-white hover:bg-white/[0.06] border border-transparent'
               ]">
-                <component :is="item.icon" class="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
+                <!-- Icon -->
+                <AppSidebarIcon :name="item.icon" class-names="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
                   :class="isActiveRoute(item.path) ? 'text-indigo-300' : 'text-slate-400 group-hover:text-slate-200'" />
 
                 <div v-if="!isCollapsed" class="flex items-center justify-between flex-1 overflow-hidden">
@@ -153,7 +154,8 @@
                   ? 'bg-gradient-to-r from-indigo-500/25 to-purple-500/15 text-white border border-indigo-500/40 shadow-[0_0_16px_rgba(99,102,241,0.25)]'
                   : 'text-slate-300 hover:text-white hover:bg-white/[0.06] border border-transparent'
               ]">
-                <component :is="item.icon" class="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
+                <!-- Icon -->
+                <AppSidebarIcon :name="item.icon" class-names="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
                   :class="isActiveRoute(item.path) ? 'text-indigo-300' : 'text-slate-400 group-hover:text-slate-200'" />
 
                 <div v-if="!isCollapsed" class="flex items-center justify-between flex-1 overflow-hidden">
@@ -323,9 +325,10 @@ const managementNavItems = computed<NavItem[]>(() => {
 const systemNavItems = computed<NavItem[]>(() => {
   const items: NavItem[] = []
 
-  // API Scalar Docs: ONLY for admin; NEVER for restaurant owner or customer
+  // API Docs: ONLY for admin; NEVER for restaurant owner or customer
   if (canAccessDocs.value) {
-    items.push({ label: 'API Scalar Docs', path: '/docs', icon: 'LucideBookOpen', target: '_blank', badge: 'v1' })
+    items.push({ label: 'API Scalar Docs', path: '/docs', icon: 'LucideBookOpen', target: '_blank', badge: 'Docs' })
+    items.push({ label: 'Swagger UI', path: '/swagger', icon: 'LucideFileCode', target: '_blank', badge: 'v1' })
   }
 
   // Settings: accessible to all authenticated accounts
