@@ -1,5 +1,6 @@
 export const useGlassSettings = () => {
   const blurRadius = useState<number>('glass_blur_radius', () => 2)
+  const backgroundImage = useState<string>('glass_bg_image', () => '/images/cyber-glass-bg.jpg')
 
   const applyBlur = (val: number) => {
     if (import.meta.client) {
@@ -21,16 +22,34 @@ export const useGlassSettings = () => {
     }
   }
 
+  const setBackgroundImage = (url: string) => {
+    if (!url || !url.trim()) return
+    const cleanUrl = url.trim()
+    backgroundImage.value = cleanUrl
+    if (import.meta.client) {
+      try {
+        localStorage.setItem('glass_bg_image', cleanUrl)
+      } catch (e) {
+        // ignore
+      }
+    }
+  }
+
   // Load from localStorage on client
   onMounted(() => {
     if (import.meta.client) {
       try {
-        const saved = localStorage.getItem('glass_blur_radius')
-        if (saved !== null) {
-          const parsed = parseFloat(saved)
+        const savedBlur = localStorage.getItem('glass_blur_radius')
+        if (savedBlur !== null) {
+          const parsed = parseFloat(savedBlur)
           if (!isNaN(parsed) && parsed >= 0 && parsed <= 40) {
             blurRadius.value = parsed
           }
+        }
+
+        const savedBg = localStorage.getItem('glass_bg_image')
+        if (savedBg && savedBg.trim()) {
+          backgroundImage.value = savedBg.trim()
         }
       } catch (e) {
         // ignore
@@ -47,5 +66,7 @@ export const useGlassSettings = () => {
   return {
     blurRadius,
     setBlur,
+    backgroundImage,
+    setBackgroundImage,
   }
 }

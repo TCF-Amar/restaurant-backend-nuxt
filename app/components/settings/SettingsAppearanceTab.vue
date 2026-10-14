@@ -93,14 +93,107 @@
 
       <!-- Mini Live Preview Box -->
       <div
-        class="mt-4 p-4 h-50 flex justify-center items-center rounded-xl border border-white/10 relative overflow-hidden bg-cover bg-center"
-        style="background-image: url('/images/dashboard-bg.jpg')">
+        class="mt-4 p-4 h-50 flex justify-center items-center rounded-xl border border-white/10 relative overflow-hidden bg-cover bg-center transition-all duration-700"
+        :style="{ backgroundImage: `url(${backgroundImage})` }">
         <div
           class="glass-header border border-white/20 w-[90%] h-[70%] flex flex-col justify-center items-center gap-3 rounded-lg text-center"
           :style="{ backdropFilter: `blur(${blurRadius}px)` }">
-          <p class="text-xs font-semibold text-white">Live Blur Preview: {{ blurRadius }}px</p>
-          <p class="text-[10px] text-slate-300">Header, sidebar & footer instantly update to this exact blur radius.</p>
+          <p class="text-xs font-semibold text-white">Live Blur & Wallpaper Preview: {{ blurRadius }}px</p>
+          <p class="text-[10px] text-slate-300">Header, sidebar & footer instantly update with your selected wallpaper and blur.</p>
         </div>
+      </div>
+    </div>
+
+    <!-- Background Wallpaper & Theme Ambience -->
+    <div class="p-5 rounded-2xl bg-white/[0.03] border border-white/[0.06] space-y-5">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-xs font-semibold text-white flex items-center gap-1.5">
+            <LucideImage class="w-3.5 h-3.5 text-indigo-400" />
+            <span>Background Wallpaper & Ambience</span>
+          </p>
+          <p class="text-[11px] text-slate-400">Choose from curated 3D liquid glass wallpapers or enter a custom image URL</p>
+        </div>
+        <button
+          v-if="backgroundImage !== defaultWallpaper"
+          @click="resetWallpaper"
+          type="button"
+          class="text-[11px] text-indigo-400 hover:text-indigo-300 underline underline-offset-2 cursor-pointer flex items-center gap-1"
+        >
+          <LucideRotateCcw class="w-3 h-3" />
+          <span>Reset Wallpaper</span>
+        </button>
+      </div>
+
+      <!-- Wallpaper Preset Cards Grid -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div
+          v-for="wp in wallpaperPresets"
+          :key="wp.url"
+          @click="setBackgroundImage(wp.url)"
+          :class="[
+            'group relative rounded-xl border p-2 flex flex-col gap-2 cursor-pointer transition-all duration-300 overflow-hidden text-left',
+            backgroundImage === wp.url
+              ? 'bg-indigo-600/20 border-indigo-500 shadow-lg shadow-indigo-500/20 ring-1 ring-indigo-500/60'
+              : 'bg-white/[0.02] border-white/10 hover:border-white/30 hover:bg-white/[0.04]'
+          ]"
+        >
+          <!-- Thumbnail with overlay -->
+          <div class="relative w-full h-24 rounded-lg overflow-hidden bg-slate-900 border border-white/5">
+            <img
+              :src="wp.url"
+              :alt="wp.title"
+              class="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500"
+            />
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+            <!-- Active Check Badge -->
+            <div
+              v-if="backgroundImage === wp.url"
+              class="absolute top-2 right-2 px-1.5 py-0.5 rounded-full bg-indigo-500 text-white text-[10px] font-bold flex items-center gap-1 shadow-sm"
+            >
+              <LucideCheck class="w-2.5 h-2.5" />
+              <span>Active</span>
+            </div>
+            <!-- Tag -->
+            <div class="absolute bottom-1.5 left-2">
+              <span class="text-[9px] font-semibold uppercase tracking-wider px-1.5 py-0.5 rounded bg-white/15 backdrop-blur-md text-white border border-white/10">
+                {{ wp.tag }}
+              </span>
+            </div>
+          </div>
+
+          <!-- Description -->
+          <div class="px-1 py-0.5">
+            <p class="text-xs font-semibold text-white">{{ wp.title }}</p>
+            <p class="text-[10px] text-slate-400 line-clamp-1">{{ wp.desc }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Custom Wallpaper URL Input -->
+      <div class="pt-3 border-t border-white/[0.06] space-y-2">
+        <label class="text-[11px] font-medium text-slate-300 flex items-center gap-1.5">
+          <LucideLink class="w-3 h-3 text-slate-400" />
+          <span>Custom Background Image URL</span>
+        </label>
+        <div class="flex items-center gap-2">
+          <input
+            v-model="customUrl"
+            type="url"
+            placeholder="https://example.com/your-wallpaper.jpg"
+            @keyup.enter="applyCustomUrl"
+            class="flex-1 px-3 py-2 rounded-xl glass-input text-xs text-white placeholder:text-slate-500 focus:outline-none focus:ring-1 focus:ring-indigo-500 font-mono"
+          />
+          <button
+            @click="applyCustomUrl"
+            :disabled="!customUrl.trim()"
+            type="button"
+            class="px-4 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-xs font-medium text-white shadow-sm transition cursor-pointer"
+          >
+            Apply
+          </button>
+        </div>
+        <p class="text-[10px] text-slate-500">Supports direct URLs to PNG, JPG, or WebP images.</p>
       </div>
     </div>
   </div>
@@ -108,7 +201,54 @@
 
 <script setup lang="ts">
 const { sidebarWidth, minWidth, maxWidth, isCollapsed, setCollapsed, resetWidth } = useSidebar()
-const { blurRadius, setBlur } = useGlassSettings()
+const { blurRadius, setBlur, backgroundImage, setBackgroundImage } = useGlassSettings()
+
+const defaultWallpaper = '/images/cyber-glass-bg.jpg'
+const customUrl = ref('')
+
+const wallpaperPresets = [
+  {
+    title: 'Liquid Chromatic Ribbon',
+    desc: 'Iridescent refractive glass ribbons in deep obsidian space',
+    url: '/images/cyber-glass-bg.jpg',
+    tag: 'Ultra Luxury',
+  },
+  {
+    title: 'Dark Obsidian Wave',
+    desc: 'Sleek dark fluid ribbons with violet and electric cyan neon glow',
+    url: '/images/dark-bg.jpg',
+    tag: 'Dark Mode',
+  },
+  {
+    title: 'Atmospheric Deep Violet',
+    desc: 'Luminous violet ambient glass with subtle deep purple glow',
+    url: '/images/auth-bg.jpg',
+    tag: 'Deep Focus',
+  },
+  {
+    title: 'Prismatic Light Glass',
+    desc: 'Bright translucent crystal dispersion with pure ethereal highlights',
+    url: '/images/dashboard-bg-light.jpg',
+    tag: 'Light Accent',
+  },
+  {
+    title: 'Cosmic Nebula Glass',
+    desc: 'Vibrant galactic glass refraction with soft electric glow',
+    url: '/images/dashboard-bg-prev.jpg',
+    tag: 'Cosmic',
+  },
+]
+
+const applyCustomUrl = () => {
+  if (customUrl.value && customUrl.value.trim()) {
+    setBackgroundImage(customUrl.value.trim())
+    customUrl.value = ''
+  }
+}
+
+const resetWallpaper = () => {
+  setBackgroundImage(defaultWallpaper)
+}
 
 const presets = [
   { px: 0, label: '0px (Clear)' },
@@ -119,3 +259,4 @@ const presets = [
   { px: 24, label: '24px (Heavy)' },
 ]
 </script>
+

@@ -2,9 +2,9 @@
   <div class="h-screen w-full relative overflow-hidden bg-[#090314] flex items-center justify-center">
     <!-- Fluid 3D Glassmorphic Background Image -->
     <img
-      src="/images/auth-bg.jpg"
+      :src="backgroundImage"
       alt="Atmospheric glass background"
-      class="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none"
+      class="absolute inset-0 w-full h-full object-cover object-center select-none pointer-events-none transition-all duration-700"
     />
     <!-- Subtle ambient overlay -->
     <div class="absolute inset-0 bg-black/25 pointer-events-none"></div>
@@ -15,4 +15,8 @@
     </div>
   </div>
 </template>
+
+<script setup lang="ts">
+const { backgroundImage } = useGlassSettings()
+</script>
 

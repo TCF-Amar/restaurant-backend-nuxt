@@ -3,8 +3,8 @@
     class="min-h-screen bg-[#070510] text-slate-100 flex flex-col relative overflow-x-hidden selection:bg-indigo-500 selection:text-white">
     <!-- Fluid 3D Glassmorphic Background Image -->
     <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      <img src="/images/dashboard-bg.jpg" alt="Fluid 3D Glass Ambient Background"
-        class="absolute inset-0 w-full h-full object-cover object-center select-none " />
+      <img :src="backgroundImage" alt="Fluid 3D Glass Ambient Background"
+        class="absolute inset-0 w-full h-full object-cover object-center select-none transition-all duration-700" />
       <!-- Ambient overlay & subtle glow orbs -->
       <div class="absolute inset-0 bg-[#04020a]/30"></div>
       <div class="absolute -top-32 -left-32 w-96 h-96 rounded-full bg-indigo-600/20 blur-[140px]"></div>
@@ -39,7 +39,7 @@
 
 <script setup lang="ts">
 const { isCollapsed, sidebarWidth, isDragging, collapsedWidth } = useSidebar()
-const { blurRadius } = useGlassSettings()
+const { blurRadius, backgroundImage } = useGlassSettings()
 
 // Dynamic left margin on desktop (lg screen and up) matching the sidebar size
 const isLgScreen = ref(true)
