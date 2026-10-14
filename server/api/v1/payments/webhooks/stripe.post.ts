@@ -35,7 +35,7 @@ export default defineEventHandler(async (event) => {
   } else {
     // Development fallback without signature verification
     try {
-      const bodyStr = typeof rawBody === "string" ? rawBody : rawBody.toString("utf-8")
+      const bodyStr = typeof rawBody === "string" ? rawBody : (rawBody as string).toString()
       stripeEvent = JSON.parse(bodyStr)
     } catch {
       throw createError({ statusCode: 400, statusMessage: "Invalid JSON format" })

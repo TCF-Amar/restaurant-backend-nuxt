@@ -2,8 +2,10 @@
   <div class="max-w-7xl mx-auto space-y-6">
     <!-- Breadcrumb & Back Navigation -->
     <div class="flex items-center gap-3">
-      <NuxtLink to="/restaurants"
-        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-slate-300 hover:text-white text-xs font-medium transition cursor-pointer">
+      <NuxtLink
+        to="/restaurants"
+        class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white/[0.05] hover:bg-white/[0.1] border border-white/10 text-slate-300 hover:text-white text-xs font-medium transition cursor-pointer"
+      >
         <LucideArrowLeft class="w-3.5 h-3.5" />
         <span>Back to Restaurants</span>
       </NuxtLink>
@@ -12,18 +14,20 @@
     </div>
 
     <!-- Loading State -->
-    <div v-if="isLoading" class="p-16 text-center text-slate-400 text-xs">
+    <div v-if="isDetailLoading" class="p-16 text-center text-slate-400 text-xs">
       <LucideLoader2 class="w-8 h-8 animate-spin mx-auto text-indigo-400 mb-3" />
       <span>Loading restaurant outlet details & menu...</span>
     </div>
 
     <!-- Error State -->
-    <div v-else-if="fetchError" class="rounded-3xl glass-card p-10 text-center border border-rose-500/30 space-y-3">
+    <div v-else-if="detailError" class="rounded-3xl glass-card p-10 text-center border border-rose-500/30 space-y-3">
       <LucideAlertTriangle class="w-10 h-10 text-rose-400 mx-auto" />
       <h3 class="text-base font-bold text-white">Outlet Not Found</h3>
-      <p class="text-xs text-slate-400 max-w-md mx-auto">{{ fetchError }}</p>
-      <NuxtLink to="/restaurants"
-        class="inline-block mt-2 px-4 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-white text-xs font-semibold transition">
+      <p class="text-xs text-slate-400 max-w-md mx-auto">{{ detailError }}</p>
+      <NuxtLink
+        to="/restaurants"
+        class="inline-block mt-2 px-4 py-2 rounded-xl bg-indigo-600/30 hover:bg-indigo-600/50 border border-indigo-500/40 text-white text-xs font-semibold transition"
+      >
         Return to Restaurants
       </NuxtLink>
     </div>
@@ -31,14 +35,21 @@
     <!-- Main Content -->
     <div v-else-if="restaurant" class="space-y-6">
       <!-- Toast Alert -->
-      <transition enter-active-class="transition duration-200 ease-out" enter-from-class="opacity-0 -translate-y-2"
-        leave-active-class="transition duration-150 ease-in" leave-to-class="opacity-0 -translate-y-2">
-        <div v-if="statusMessage" :class="[
-          'p-4 rounded-2xl border text-xs font-medium flex items-center justify-between gap-3 shadow-lg backdrop-blur-md',
-          statusMessage.type === 'success'
-            ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-200'
-            : 'bg-rose-500/15 border-rose-500/30 text-rose-200'
-        ]">
+      <transition
+        enter-active-class="transition duration-200 ease-out"
+        enter-from-class="opacity-0 -translate-y-2"
+        leave-active-class="transition duration-150 ease-in"
+        leave-to-class="opacity-0 -translate-y-2"
+      >
+        <div
+          v-if="statusMessage"
+          :class="[
+            'p-4 rounded-2xl border text-xs font-medium flex items-center justify-between gap-3 shadow-lg backdrop-blur-md',
+            statusMessage.type === 'success'
+              ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-200'
+              : 'bg-rose-500/15 border-rose-500/30 text-rose-200'
+          ]"
+        >
           <div class="flex items-center gap-2.5">
             <LucideCheckCircle2 v-if="statusMessage.type === 'success'" class="w-4 h-4 text-emerald-400 shrink-0" />
             <LucideAlertTriangle v-else class="w-4 h-4 text-rose-400 shrink-0" />
@@ -51,110 +62,171 @@
       </transition>
 
       <!-- Outlet Hero Banner -->
-      <RestaurantDetailHero :restaurant="restaurant" :total-menu-items="menuItems.length"
+      <RestaurantDetailHero
+        :restaurant="restaurant"
+        :total-menu-items="menuItems.length"
         :can-manage-outlet="isSuperAdmin || hasRestaurantPermission('MANAGE_OUTLET', restaurantId)"
         :can-manage-orders="isSuperAdmin || hasRestaurantPermission('MANAGE_ORDERS', restaurantId)"
-        :is-submitting="isSubmitting" :is-refreshing="isRefreshing" @toggle-status="toggleOutletStatus"
-        @open-settings="activeTab = 'settings'" @refresh="fetchRestaurantDetails" />
+        :is-submitting="isSubmitting"
+        :is-refreshing="isRefreshing"
+        @toggle-status="restaurantStore.toggleCurrentOutletStatus"
+        @open-settings="activeTab = 'settings'"
+        @refresh="refreshDetails"
+      />
 
       <!-- Tab Navigation -->
       <div class="flex items-center gap-2 border-b border-white/[0.08] pb-3 overflow-x-auto text-xs">
-        <button v-for="tab in tabs" :key="tab.id" @click="activeTab = tab.id" type="button" :class="[
-          'px-4 py-2 rounded-xl font-semibold transition cursor-pointer flex items-center gap-2 whitespace-nowrap',
-          activeTab === tab.id
-            ? 'bg-indigo-600/30 border border-indigo-500/40 text-white shadow-md'
-            : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
-        ]">
+        <button
+          v-for="tab in tabs"
+          :key="tab.id"
+          @click="activeTab = tab.id"
+          type="button"
+          :class="[
+            'px-4 py-2 rounded-xl font-semibold transition cursor-pointer flex items-center gap-2 whitespace-nowrap',
+            activeTab === tab.id
+              ? 'bg-indigo-600/30 border border-indigo-500/40 text-white shadow-md'
+              : 'text-slate-400 hover:text-white hover:bg-white/[0.04]'
+          ]"
+        >
           <LucideUtensils v-if="tab.id === 'menu'" class="w-3.5 h-3.5" />
           <LucideUsers v-else-if="tab.id === 'staff'" class="w-3.5 h-3.5" />
           <LucideShoppingBag v-else-if="tab.id === 'orders'" class="w-3.5 h-3.5" />
           <LucideSettings v-else-if="tab.id === 'settings'" class="w-3.5 h-3.5" />
           <span>{{ tab.label }}</span>
-          <span v-if="tab.badge !== undefined"
-            class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10 text-slate-300">
+          <span
+            v-if="tab.badge !== undefined"
+            class="px-1.5 py-0.2 rounded-full text-[10px] bg-white/10 text-slate-300"
+          >
             {{ tab.badge }}
           </span>
         </button>
       </div>
 
       <!-- TAB 1: MENU ITEMS & CATEGORIES -->
-      <RestaurantMenuTab v-if="activeTab === 'menu'" :menu-items="menuItems" :categories="restaurant.categories || []"
-        :total-items="menuPagination.total || menuItems.length" v-model:search-query="menuSearchQuery"
+      <RestaurantMenuTab
+        v-if="activeTab === 'menu'"
+        :menu-items="menuItems"
+        :categories="restaurant.categories || []"
+        :total-items="menuPagination.total || menuItems.length"
+        v-model:search-query="menuSearchQuery"
         v-model:selected-category="selectedCategoryFilter"
         :can-manage-categories="isSuperAdmin || hasRestaurantPermission('MANAGE_CATEGORIES', restaurantId)"
         :can-manage-menu-items="isSuperAdmin || hasRestaurantPermission('MANAGE_MENU_ITEMS', restaurantId)"
-        :loading="isLoading" :pagination="menuPagination" @open-manage-categories="showManageCategoriesModal = true"
-        @open-add-category="openAddCategoryModal()" @open-add-item="openAddItemModal()"
-        @edit-item="openEditMenuItemModal" @delete-item="deleteMenuItem" @page-change="onMenuPageChange" />
+        :loading="isDetailLoading"
+        :pagination="menuPagination"
+        @open-manage-categories="showManageCategoriesModal = true"
+        @open-add-category="openAddCategoryModal()"
+        @open-add-item="openAddItemModal()"
+        @edit-item="openEditMenuItemModal"
+        @delete-item="handleDeleteMenuItem"
+        @page-change="restaurantStore.onMenuPageChange"
+      />
 
       <!-- TAB 2: AUTHORIZED STAFF & ACCESS CONTROL -->
-      <RestaurantStaffTab v-else-if="activeTab === 'staff' && isSuperAdmin" :staff-list="restaurant.owners || []"
-        @open-assign-staff="openAssignStaffModal" @revoke-staff="revokeStaffAccess" />
+      <RestaurantStaffTab
+        v-else-if="activeTab === 'staff' && isSuperAdmin"
+        :staff-list="restaurant.owners || []"
+        @open-assign-staff="openAssignStaffModal"
+        @revoke-staff="handleRevokeStaff"
+      />
 
       <!-- TAB 3: RECENT ORDERS OVERVIEW -->
       <RestaurantOrdersTab
         v-else-if="activeTab === 'orders' && (isSuperAdmin || hasRestaurantPermission('MANAGE_ORDERS', restaurantId))"
-        :restaurant-id="restaurant.id" :restaurant-name="restaurant.name" :orders="ordersList" :loading="isLoading"
-        :pagination="ordersPagination" @page-change="onOrdersPageChange" />
+        :restaurant-id="restaurant.id"
+        :restaurant-name="restaurant.name"
+        :orders="ordersList"
+        :loading="isDetailLoading"
+        :pagination="ordersPagination"
+        @page-change="restaurantStore.onOrdersPageChange"
+      />
 
       <!-- TAB 4: OUTLET SETTINGS -->
       <RestaurantSettingsTab
         v-else-if="activeTab === 'settings' && (isSuperAdmin || hasRestaurantPermission('MANAGE_OUTLET', restaurantId))"
-        :form="editForm" :is-submitting="isSubmitting" @save-settings="saveOutletSettings" />
+        :form="editForm"
+        :is-submitting="isSubmitting"
+        @save-settings="handleSaveSettings"
+      />
     </div>
 
     <!-- MODAL 1: ADD / EDIT MENU ITEM -->
-    <MenuItemModal :show="showAddItemModal" :is-editing="isEditingItem" :is-submitting="isSubmitting"
-      :categories="restaurant?.categories || []" :form="newItemForm" @close="showAddItemModal = false"
-      @save="saveMenuItem" @add-variant="addVariantRow" @remove-variant="removeVariantRow" @add-addon="addAddonRow"
-      @remove-addon="removeAddonRow" />
+    <MenuItemModal
+      :show="showAddItemModal"
+      :is-editing="isEditingItem"
+      :is-submitting="isSubmitting"
+      :categories="restaurant?.categories || []"
+      :form="newItemForm"
+      @close="showAddItemModal = false"
+      @save="handleSaveMenuItem"
+      @add-variant="addVariantRow"
+      @remove-variant="removeVariantRow"
+      @add-addon="addAddonRow"
+      @remove-addon="removeAddonRow"
+    />
 
     <!-- MODAL 2: MANAGE ALL CATEGORIES -->
-    <ManageCategoriesModal :show="showManageCategoriesModal" :categories="restaurant?.categories || []"
-      :user-role="user?.role" @close="showManageCategoriesModal = false" @open-add-category="openAddCategoryModal()"
-      @edit-category="openEditCategoryModal" @delete-category="deleteCategory" />
+    <ManageCategoriesModal
+      :show="showManageCategoriesModal"
+      :categories="restaurant?.categories || []"
+      :user-role="user?.role"
+      @close="showManageCategoriesModal = false"
+      @open-add-category="openAddCategoryModal()"
+      @edit-category="openEditCategoryModal"
+      @delete-category="handleDeleteCategory"
+    />
 
     <!-- MODAL 3: ADD / EDIT CATEGORY -->
-    <CategoryModal :show="showAddCategoryModal" :is-editing="isEditingCategory" :is-admin="user?.role === 'ADMIN'"
-      :is-submitting="isSubmitting" :form="categoryForm" @close="showAddCategoryModal = false" @save="saveCategory" />
+    <CategoryModal
+      :show="showAddCategoryModal"
+      :is-editing="isEditingCategory"
+      :is-admin="user?.role === 'ADMIN'"
+      :is-submitting="isSubmitting"
+      :form="categoryForm"
+      @close="showAddCategoryModal = false"
+      @save="handleSaveCategory"
+    />
 
     <!-- MODAL 4: ASSIGN NEW STAFF MEMBER -->
-    <AssignStaffModal :show="showAssignStaffModal && isSuperAdmin" :is-submitting="isSubmitting"
-      :candidate-users="candidateUsers" :form="staffForm" @close="showAssignStaffModal = false"
-      @submit="saveStaffAssignment" />
+    <AssignStaffModal
+      :show="showAssignStaffModal && isSuperAdmin"
+      :is-submitting="isSubmitting"
+      :candidate-users="candidateUsers"
+      :form="staffForm"
+      @close="showAssignStaffModal = false"
+      @submit="handleSaveStaffAssignment"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
+import { storeToRefs } from 'pinia'
+import { useRestaurantStore } from '~/stores/restaurants'
 
 const route = useRoute()
 const restaurantId = computed(() => String(route.params.id))
-const api = useApi()
-
-const restaurant = ref<any>(null)
-const menuItems = ref<any[]>([])
-const ordersList = ref<any[]>([])
-const candidateUsers = ref<any[]>([])
-
-const isLoading = ref(true)
-const isRefreshing = ref(false)
-const isSubmitting = ref(false)
-const fetchError = ref<string | null>(null)
-const statusMessage = ref<{ type: 'success' | 'error'; text: string } | null>(null)
-
-const activeTab = ref('menu')
-const menuSearchQuery = ref('')
-const selectedCategoryFilter = ref('ALL')
-
-const menuPage = ref(1)
-const menuPagination = ref({ total: 0, page: 1, limit: 9, totalPages: 1 })
-
-const ordersPage = ref(1)
-const ordersPagination = ref({ total: 0, page: 1, limit: 10, totalPages: 1 })
-
 const { user, isSuperAdmin, hasRestaurantPermission } = useAuth()
+const restaurantStore = useRestaurantStore()
 
-// Modals
+const {
+  currentRestaurant: restaurant,
+  isDetailLoading,
+  isRefreshing,
+  isSubmitting,
+  detailError,
+  statusMessage,
+  activeTab,
+  menuItems,
+  menuSearchQuery,
+  selectedCategoryFilter,
+  menuPage,
+  menuPagination,
+  ordersList,
+  ordersPagination,
+  candidateUsers,
+} = storeToRefs(restaurantStore)
+
+// Local UI Modal Visibility State
 const showManageCategoriesModal = ref(false)
 const showAddItemModal = ref(false)
 const showAddCategoryModal = ref(false)
@@ -176,7 +248,7 @@ interface AddonRow {
   price: number | null
 }
 
-// Forms
+// Local Forms
 const newItemForm = ref({
   name: '',
   description: '',
@@ -210,6 +282,23 @@ const editForm = ref({
   bannerUrl: '',
 })
 
+// Sync edit form with current restaurant details
+watch(restaurant, (newRest) => {
+  if (newRest) {
+    editForm.value = {
+      name: newRest.name || '',
+      description: newRest.description || '',
+      address: newRest.address || '',
+      phone: newRest.phone || '',
+      logoUrl: newRest.logoUrl || '',
+      bannerUrl: newRest.bannerUrl || '',
+    }
+    if (newRest.categories && newRest.categories.length > 0 && !newItemForm.value.categoryId) {
+      newItemForm.value.categoryId = newRest.categories[0].id
+    }
+  }
+}, { immediate: true })
+
 const tabs = computed(() => {
   const list = [
     { id: 'menu', label: 'Menu & Dishes', badge: menuPagination.value.total || menuItems.value.length },
@@ -227,138 +316,22 @@ const tabs = computed(() => {
 })
 
 watch(tabs, (currentTabs) => {
-  if (!currentTabs.some(t => t.id === activeTab.value)) {
+  if (!currentTabs.some((t) => t.id === activeTab.value)) {
     activeTab.value = 'menu'
   }
 })
 
-async function fetchRestaurantDetails() {
-  if (!restaurantId.value) return
-  isRefreshing.value = true
-  fetchError.value = null
-
-  try {
-    const res = await api.get<any>(`/api/v1/owner/restaurants/${restaurantId.value}/details`)
-    restaurant.value = res.restaurant
-
-    // Populate edit form
-    editForm.value = {
-      name: res.restaurant.name || '',
-      description: res.restaurant.description || '',
-      address: res.restaurant.address || '',
-      phone: res.restaurant.phone || '',
-      logoUrl: res.restaurant.logoUrl || '',
-      bannerUrl: res.restaurant.bannerUrl || '',
-    }
-
-    if (res.restaurant.categories && res.restaurant.categories.length > 0 && !newItemForm.value.categoryId) {
-      newItemForm.value.categoryId = res.restaurant.categories[0].id
-    }
-
-    await loadMenuItems()
-    await loadOrders()
-  } catch (err: any) {
-    fetchError.value = err?.data?.statusMessage || err?.message || 'Failed to load restaurant details'
-  } finally {
-    isLoading.value = false
-    isRefreshing.value = false
-  }
-}
-
-async function loadMenuItems() {
-  try {
-    const res = await api.get<any>(`/api/v1/owner/restaurants/${restaurantId.value}/menu-items`, {
-      params: {
-        page: menuPage.value,
-        limit: 9,
-        categoryId: selectedCategoryFilter.value !== 'ALL' ? selectedCategoryFilter.value : undefined,
-        search: menuSearchQuery.value.trim() || undefined,
-      },
-    })
-    menuItems.value = res.menuItems || []
-    if (res.pagination) {
-      menuPagination.value = res.pagination
-    }
-  } catch {
-    menuItems.value = []
-  }
-}
-
-function onMenuPageChange(newPage: number) {
-  menuPage.value = newPage
-  loadMenuItems()
-}
-
 watch([selectedCategoryFilter, menuSearchQuery], () => {
   menuPage.value = 1
-  loadMenuItems()
+  restaurantStore.loadMenuItems()
 })
 
-async function loadOrders() {
-  try {
-    const res = await api.get<any>(`/api/v1/owner/restaurants/${restaurantId.value}/orders`, {
-      params: {
-        page: ordersPage.value,
-        limit: 10,
-      },
-    })
-    ordersList.value = res.orders || []
-    if (res.pagination) {
-      ordersPagination.value = res.pagination
-    }
-  } catch {
-    ordersList.value = []
-  }
+function refreshDetails() {
+  restaurantStore.fetchRestaurantDetails(restaurantId.value)
 }
 
-function onOrdersPageChange(newPage: number) {
-  ordersPage.value = newPage
-  loadOrders()
-}
-
-async function toggleOutletStatus() {
-  if (!restaurant.value) return
-
-  isSubmitting.value = true
-  try {
-    const res = await api.patch<any>(`/api/v1/owner/restaurants/${restaurantId.value}/status`)
-    if (res?.restaurant) {
-      restaurant.value.isActive = res.restaurant.isActive
-      statusMessage.value = {
-        type: 'success',
-        text: `Outlet is now ${res.restaurant.isActive ? 'Active (Open)' : 'Inactive (Closed)'}`,
-      }
-    }
-  } catch (err: any) {
-    statusMessage.value = {
-      type: 'error',
-      text: err?.data?.statusMessage || err?.data?.message || err?.message || 'Failed to toggle status',
-    }
-  } finally {
-    isSubmitting.value = false
-  }
-}
-
-async function saveOutletSettings() {
-  isSubmitting.value = true
-  try {
-    const res = await api.put<any>(`/api/v1/owner/restaurants/${restaurantId.value}/details`, editForm.value)
-
-    if (res?.restaurant) {
-      restaurant.value = { ...restaurant.value, ...res.restaurant }
-      statusMessage.value = {
-        type: 'success',
-        text: 'Outlet details updated successfully',
-      }
-    }
-  } catch (err: any) {
-    statusMessage.value = {
-      type: 'error',
-      text: err?.data?.statusMessage || err?.data?.message || err?.message || 'Failed to save settings',
-    }
-  } finally {
-    isSubmitting.value = false
-  }
+async function handleSaveSettings() {
+  await restaurantStore.saveOutletSettings(editForm.value)
 }
 
 function openAddCategoryModal() {
@@ -385,85 +358,31 @@ function openEditCategoryModal(cat: any) {
   showAddCategoryModal.value = true
 }
 
-async function saveCategory() {
+async function handleSaveCategory() {
   if (!categoryForm.value.name.trim()) return
-
-  isSubmitting.value = true
-  try {
-    const payload = {
+  const success = await restaurantStore.saveCategory(
+    {
       name: categoryForm.value.name.trim(),
       imageUrl: categoryForm.value.imageUrl?.trim() || undefined,
       description: categoryForm.value.description?.trim() || undefined,
-    }
-
-    if (isEditingCategory.value && editingCategoryId.value) {
-      const res = await api.put<any>(
-        `/api/v1/owner/restaurants/${restaurantId.value}/categories/${editingCategoryId.value}`,
-        payload
-      )
-      if (res?.category) {
-        showAddCategoryModal.value = false
-        statusMessage.value = {
-          type: 'success',
-          text: `Category "${res.category.name}" updated`,
-        }
-        await fetchRestaurantDetails()
-      }
-    } else {
-      const res = await api.post<any>(
-        `/api/v1/owner/restaurants/${restaurantId.value}/categories`,
-        {
-          ...payload,
-          isGlobal: categoryForm.value.isGlobal,
-        }
-      )
-      if (res?.category) {
-        showAddCategoryModal.value = false
-        statusMessage.value = {
-          type: 'success',
-          text: `Category "${res.category.name}" created`,
-        }
-        await fetchRestaurantDetails()
-      }
-    }
-  } catch (err: any) {
-    statusMessage.value = {
-      type: 'error',
-      text: err?.data?.statusMessage || err?.data?.message || err?.message || 'Failed to save category',
-    }
-  } finally {
-    isSubmitting.value = false
+      isGlobal: categoryForm.value.isGlobal,
+    },
+    isEditingCategory.value,
+    editingCategoryId.value
+  )
+  if (success) {
+    showAddCategoryModal.value = false
   }
 }
 
-async function deleteCategory(cat: any) {
+async function handleDeleteCategory(cat: any) {
   const isGlobal = !cat.restaurantId
   const confirmMsg = isGlobal
     ? `Delete platform-wide global category "${cat.name}"? This removes it for all restaurants.`
     : `Delete category "${cat.name}" from this restaurant?`
 
   if (!confirm(confirmMsg)) return
-
-  isSubmitting.value = true
-  try {
-    const res = await api.delete<any>(
-      `/api/v1/owner/restaurants/${restaurantId.value}/categories/${cat.id}`
-    )
-    if (res?.status === 'ok') {
-      statusMessage.value = {
-        type: 'success',
-        text: `Category "${cat.name}" deleted`,
-      }
-      await fetchRestaurantDetails()
-    }
-  } catch (err: any) {
-    statusMessage.value = {
-      type: 'error',
-      text: err?.data?.statusMessage || err?.data?.message || err?.message || 'Failed to delete category',
-    }
-  } finally {
-    isSubmitting.value = false
-  }
+  await restaurantStore.deleteCategory(cat.id, cat.name)
 }
 
 function openAddItemModal() {
@@ -514,7 +433,7 @@ function removeAddonRow(index: number) {
   newItemForm.value.addons.splice(index, 1)
 }
 
-async function saveMenuItem() {
+async function handleSaveMenuItem() {
   if (!newItemForm.value.name || !newItemForm.value.price || !newItemForm.value.categoryId) return
 
   const validVariants = newItemForm.value.variants
@@ -525,9 +444,8 @@ async function saveMenuItem() {
     .filter((a) => a.name.trim() && a.price !== null && Number(a.price) >= 0)
     .map((a) => ({ name: a.name.trim(), price: Number(a.price) }))
 
-  isSubmitting.value = true
-  try {
-    const payload = {
+  const success = await restaurantStore.saveMenuItem(
+    {
       name: newItemForm.value.name.trim(),
       description: newItemForm.value.description?.trim() || undefined,
       price: Number(newItemForm.value.price),
@@ -536,78 +454,23 @@ async function saveMenuItem() {
       isAvailable: newItemForm.value.isAvailable,
       variants: validVariants,
       addons: validAddons,
-    }
+    },
+    isEditingItem.value,
+    editingItemId.value
+  )
 
-    if (isEditingItem.value && editingItemId.value) {
-      const res = await api.put<any>(
-        `/api/v1/owner/restaurants/${restaurantId.value}/menu-items/${editingItemId.value}`,
-        payload
-      )
-      if (res?.menuItem) {
-        showAddItemModal.value = false
-        statusMessage.value = {
-          type: 'success',
-          text: `Menu item "${res.menuItem.name}" updated successfully`,
-        }
-        await loadMenuItems()
-      }
-    } else {
-      const res = await api.post<any>(
-        `/api/v1/owner/restaurants/${restaurantId.value}/menu-items`,
-        payload
-      )
-      if (res?.menuItem) {
-        showAddItemModal.value = false
-        statusMessage.value = {
-          type: 'success',
-          text: `Menu item "${res.menuItem.name}" added successfully`,
-        }
-        await loadMenuItems()
-        if (restaurant.value._count) {
-          restaurant.value._count.menuItems = (restaurant.value._count.menuItems || 0) + 1
-        }
-      }
-    }
-  } catch (err: any) {
-    statusMessage.value = {
-      type: 'error',
-      text: err?.data?.statusMessage || err?.data?.message || err?.message || 'Failed to save menu item',
-    }
-  } finally {
-    isSubmitting.value = false
+  if (success) {
+    showAddItemModal.value = false
   }
 }
 
-async function deleteMenuItem(item: any) {
+async function handleDeleteMenuItem(item: any) {
   if (!confirm(`Delete "${item.name}" from the menu?`)) return
-
-  try {
-    const res = await api.delete<any>(`/api/v1/owner/restaurants/${restaurantId.value}/menu-items/${item.id}`)
-    if (res?.status === 'ok') {
-      menuItems.value = menuItems.value.filter((m) => m.id !== item.id)
-      statusMessage.value = {
-        type: 'success',
-        text: `"${item.name}" deleted from menu`,
-      }
-      if (restaurant.value._count?.menuItems) {
-        restaurant.value._count.menuItems--
-      }
-    }
-  } catch (err: any) {
-    statusMessage.value = {
-      type: 'error',
-      text: err?.data?.statusMessage || err?.data?.message || err?.message || 'Failed to delete menu item',
-    }
-  }
+  await restaurantStore.deleteMenuItem(item)
 }
 
 async function openAssignStaffModal() {
-  try {
-    const res = await api.get<any>('/api/v1/admin/users')
-    candidateUsers.value = res.users || []
-  } catch {
-    candidateUsers.value = []
-  }
+  await restaurantStore.loadCandidateUsers()
   staffForm.value = {
     userId: candidateUsers.value[0]?.id || '',
     permissions: ['MANAGE_OUTLET', 'MANAGE_CATEGORIES', 'MANAGE_MENU_ITEMS', 'MANAGE_ORDERS'],
@@ -616,60 +479,20 @@ async function openAssignStaffModal() {
   showAssignStaffModal.value = true
 }
 
-async function saveStaffAssignment() {
+async function handleSaveStaffAssignment() {
   if (!staffForm.value.userId || staffForm.value.permissions.length === 0) return
-
-  isSubmitting.value = true
-  try {
-    const res = await api.post<any>(`/api/v1/admin/users/${staffForm.value.userId}/access`, {
-      restaurantId: restaurantId.value,
-      permissions: staffForm.value.permissions,
-      isPrimary: staffForm.value.isPrimary,
-    })
-
-    if (res?.assignment) {
-      showAssignStaffModal.value = false
-      statusMessage.value = {
-        type: 'success',
-        text: 'Staff access granted successfully',
-      }
-      await fetchRestaurantDetails()
-    }
-  } catch (err: any) {
-    statusMessage.value = {
-      type: 'error',
-      text: err?.data?.statusMessage || err?.data?.message || err?.message || 'Failed to grant staff access',
-    }
-  } finally {
-    isSubmitting.value = false
+  const success = await restaurantStore.assignStaff(staffForm.value)
+  if (success) {
+    showAssignStaffModal.value = false
   }
 }
 
-async function revokeStaffAccess(staff: any) {
+async function handleRevokeStaff(staff: any) {
   if (!confirm(`Revoke outlet staff access for "${staff.user?.name}"?`)) return
-
-  isSubmitting.value = true
-  try {
-    const res = await api.delete<any>(`/api/v1/admin/users/${staff.userId}/access?restaurantId=${restaurantId.value}`)
-
-    if (res?.status === 'ok') {
-      statusMessage.value = {
-        type: 'success',
-        text: `Revoked access for ${staff.user?.name}`,
-      }
-      await fetchRestaurantDetails()
-    }
-  } catch (err: any) {
-    statusMessage.value = {
-      type: 'error',
-      text: err?.data?.statusMessage || err?.data?.message || err?.message || 'Failed to revoke staff access',
-    }
-  } finally {
-    isSubmitting.value = false
-  }
+  await restaurantStore.revokeStaffAccess(staff)
 }
 
 onMounted(() => {
-  fetchRestaurantDetails()
+  restaurantStore.fetchRestaurantDetails(restaurantId.value)
 })
 </script>

@@ -17,6 +17,7 @@
     "worker:dev": "bun --watch workers/index.ts"
   },
   "dependencies": {
+    "@pinia/nuxt": "^1.0.3",
     "@prisma/adapter-pg": "^7.10.0",
     "@prisma/client": "^7.10.0",
     "@simplewebauthn/browser": "^14.0.0",
@@ -31,6 +32,7 @@
     "nuxt-lucide-icons": "2.1.0",
     "otpauth": "^9.5.2",
     "pg": "^8.23.1",
+    "pinia": "^4.1.0",
     "qrcode": "^1.5.4",
     "razorpay": "^2.9.8",
     "stripe": "^23.0.0",
