@@ -1,5 +1,5 @@
 import z from "zod"
-
+import type { Prisma } from "@prisma/client"
 
 export default defineEventHandler(async (event) => {
   // STRICT CHECK: Only ADMIN can manage users. Restaurant owners will get 403.
@@ -10,16 +10,16 @@ export default defineEventHandler(async (event) => {
   const search = query.search ? String(query.search).trim() : undefined
   const returnAll = query.all === "true" || query.all === "1"
 
-  const where = {
+  const where: Prisma.UserWhereInput = {
     ...(roleFilter && roleFilter !== "ALL" ? { role: roleFilter as any } : {}),
     ...(search
       ? {
-          OR: [
-            { name: { contains: search, mode: "insensitive" } },
-            { email: { contains: search, mode: "insensitive" } },
-            { phone: { contains: search, mode: "insensitive" } },
-          ],
-        }
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { email: { contains: search, mode: "insensitive" } },
+          { phone: { contains: search, mode: "insensitive" } },
+        ],
+      }
       : {}),
   }
 

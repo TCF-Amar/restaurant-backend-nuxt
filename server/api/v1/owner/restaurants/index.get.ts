@@ -1,5 +1,7 @@
 
 
+import type { Prisma } from "@prisma/client"
+
 export default defineEventHandler(async (event) => {
   const auth = requireAuth(event)
 
@@ -9,7 +11,7 @@ export default defineEventHandler(async (event) => {
   const statusFilter = query.status ? String(query.status) : undefined
   const { page, limit, skip } = getPaginationParams(event, 9)
 
-  const whereRestaurant = {
+  const whereRestaurant: Prisma.RestaurantWhereInput = {
     ...(statusFilter === "ACTIVE" ? { isActive: true } : statusFilter === "INACTIVE" ? { isActive: false } : {}),
     ...(search
       ? {

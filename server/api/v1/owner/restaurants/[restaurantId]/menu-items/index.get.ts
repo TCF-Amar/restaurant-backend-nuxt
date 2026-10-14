@@ -1,4 +1,4 @@
-
+import type { Prisma } from "@prisma/client"
 
 export default defineEventHandler(async (event) => {
   const restaurantId = getRouterParam(event, "restaurantId")
@@ -14,7 +14,7 @@ export default defineEventHandler(async (event) => {
   const returnAll = query.all === "true" || query.all === "1"
   const { page, limit, skip } = getPaginationParams(event, 9)
 
-  const where = {
+  const where: Prisma.MenuItemWhereInput = {
     restaurantId,
     ...(categoryId ? { categoryId } : {}),
     ...(search

@@ -6,9 +6,13 @@ import {
   verifyAuthenticationResponse,
 } from "@simplewebauthn/server"
 
-export function getWebAuthnConfig(event: H3Event) {
+export function getWebAuthnConfig(event: H3Event): {
+  rpName: string
+  rpID: string
+  origin: string
+} {
   const host = getHeader(event, "host") || "localhost:3000"
-  const hostname = host.split(":")[0] // 'localhost' or domain name without port
+  const hostname = host.split(":")[0] || "localhost"
   const proto = getHeader(event, "x-forwarded-proto") || (host.includes("localhost") ? "http" : "https")
   const origin = `${proto}://${host}`
 
