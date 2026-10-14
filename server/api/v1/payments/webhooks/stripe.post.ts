@@ -81,9 +81,12 @@ export default defineEventHandler(async (event) => {
         prisma.order.update({
           where: { id: payment.orderId },
           data: {
-            status: payment.order.status === "PENDING" ? "ACCEPTED" : payment.order.status,
+            status: (payment.order.status === "PAYMENT_PENDING" || payment.order.status === "PENDING") ? "ACCEPTED" : payment.order.status,
             paymentStatus: "PAID",
           },
+        }),
+        prisma.cartItem.deleteMany({
+          where: { cart: { userId: payment.order.userId } },
         }),
         prisma.paymentWebhookLog.updateMany({
           where: { eventId },

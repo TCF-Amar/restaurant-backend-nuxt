@@ -175,9 +175,12 @@ export default defineEventHandler(async (event) => {
       prisma.order.update({
         where: { id: order.id },
         data: {
-          status: order.status === "PENDING" ? "ACCEPTED" : order.status,
+          status: (order.status === "PAYMENT_PENDING" || order.status === "PENDING") ? "ACCEPTED" : order.status,
           paymentStatus: "PAID",
         },
+      }),
+      prisma.cartItem.deleteMany({
+        where: { cart: { userId: order.userId } },
       }),
     ])
 
@@ -246,9 +249,12 @@ export default defineEventHandler(async (event) => {
         prisma.order.update({
           where: { id: order.id },
           data: {
-            status: order.status === "PENDING" ? "ACCEPTED" : order.status,
+            status: (order.status === "PAYMENT_PENDING" || order.status === "PENDING") ? "ACCEPTED" : order.status,
             paymentStatus: "PAID",
           },
+        }),
+        prisma.cartItem.deleteMany({
+          where: { cart: { userId: order.userId } },
         }),
       ])
 
