@@ -1,5 +1,39 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Global & Admin Categories"],
+    summary: "Update category by ID",
+    description: "Update category name, description, image, or convert between global and outlet-specific scope.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Category ID" },
+    ],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              description: { type: "string", nullable: true },
+              imageUrl: { type: "string", nullable: true },
+              restaurantId: { type: "string", nullable: true },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Category updated successfully" },
+      400: { description: "Invalid parameters" },
+      403: { description: "Forbidden" },
+      404: { description: "Category not found" },
+    },
+  },
+})
+
 const adminUpdateCategorySchema = z.object({
   name: z.string().min(1, "Category name is required").optional(),
   description: z.string().nullable().optional(),

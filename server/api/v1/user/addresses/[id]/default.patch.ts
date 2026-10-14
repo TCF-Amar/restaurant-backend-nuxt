@@ -1,6 +1,28 @@
 import { requireAuth } from "../../../../../utils/guard"
 import { prisma } from "../../../../../utils/prisma"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["User Addresses"],
+    summary: "Set address as default",
+    description: "Designate a specific address as the primary default delivery location.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        required: true,
+        schema: { type: "string" },
+        description: "Address unique ID",
+      },
+    ],
+    responses: {
+      200: { description: "Address set as default successfully" },
+      404: { description: "Address not found" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = requireAuth(event)
   const id = getRouterParam(event, "id")

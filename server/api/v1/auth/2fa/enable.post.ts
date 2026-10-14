@@ -1,5 +1,33 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Two-Factor Authentication (2FA)"],
+    summary: "Verify & enable 2FA",
+    description: "Confirm TOTP setup by providing the 6-digit verification code from your authenticator app. Saves secret and marks 2FA as active.",
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["code"],
+            properties: {
+              code: { type: "string", example: "123456", description: "6-digit TOTP code" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Two-factor authentication enabled successfully" },
+      400: { description: "Invalid code or setup session expired" },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = await requireAuthUser(event)
   const body = await readBody(event)

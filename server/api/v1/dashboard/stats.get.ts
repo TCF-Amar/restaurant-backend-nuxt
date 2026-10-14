@@ -1,3 +1,16 @@
+defineRouteMeta({
+  openAPI: {
+    tags: ["Dashboard & Analytics"],
+    summary: "Get dashboard statistics",
+    description: "Fetch high-level KPI metrics, order pipelines, active stores, revenues, and recent activity tailored to caller role (Admin or Restaurant Owner).",
+    security: [{ bearerAuth: [] }],
+    responses: {
+      200: { description: "Dashboard statistics and summary" },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const auth = requireAuth(event)
 

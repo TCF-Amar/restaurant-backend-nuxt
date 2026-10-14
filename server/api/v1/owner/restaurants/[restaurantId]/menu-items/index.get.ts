@@ -1,5 +1,27 @@
 import type { Prisma } from "@prisma/client"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Restaurant Menu Items"],
+    summary: "List menu items / dishes",
+    description: "Fetch paginated dishes and menu items for a restaurant, with optional category and keyword search filters, variants, and addons.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+      { name: "categoryId", in: "query", schema: { type: "string" }, description: "Filter by category ID or ALL" },
+      { name: "search", in: "query", schema: { type: "string" }, description: "Search by dish name or description" },
+      { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+      { name: "limit", in: "query", schema: { type: "integer", default: 9 } },
+      { name: "all", in: "query", schema: { type: "boolean" } },
+    ],
+    responses: {
+      200: { description: "Menu items list" },
+      401: { description: "Unauthorized" },
+      403: { description: "Forbidden" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const restaurantId = getRouterParam(event, "restaurantId")
   if (!restaurantId) {

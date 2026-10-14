@@ -1,5 +1,34 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Passkeys & WebAuthn"],
+    summary: "Verify & store new passkey",
+    description: "Verify client WebAuthn registration response and persist public key credential.",
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["response"],
+            properties: {
+              response: { type: "object", description: "Attestation response from navigator.credentials.create" },
+              name: { type: "string", example: "MacBook Pro Touch ID" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Passkey registered successfully" },
+      400: { description: "Invalid attestation or expired challenge" },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = await requireAuthUser(event)
   const body = await readBody(event)

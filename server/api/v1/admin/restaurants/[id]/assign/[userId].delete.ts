@@ -1,5 +1,23 @@
 
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Admin Restaurant Management"],
+    summary: "Unassign staff from restaurant",
+    description: "Remove user from restaurant staff list. Requires Admin privileges.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+      { name: "userId", in: "path", required: true, schema: { type: "string" }, description: "User ID" },
+    ],
+    responses: {
+      200: { description: "User unassigned successfully" },
+      400: { description: "Missing required parameters" },
+      403: { description: "Forbidden" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   // STRICT: Only ADMIN can unassign owners
   requireAdmin(event)

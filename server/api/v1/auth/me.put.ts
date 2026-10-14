@@ -1,5 +1,35 @@
 import { z } from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Authentication & Profile"],
+    summary: "Update current user profile",
+    description: "Update display name, email, or contact phone for the currently authenticated account.",
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["name"],
+            properties: {
+              name: { type: "string", example: "John Doe" },
+              email: { type: "string", format: "email", example: "user@example.com" },
+              phone: { type: "string", example: "+15551234567" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Profile updated successfully" },
+      400: { description: "Validation error or email/phone in use" },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 const updateProfileSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters").max(100),
   email: z.string().email("Invalid email format").optional().or(z.literal("")),

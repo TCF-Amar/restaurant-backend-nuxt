@@ -1,3 +1,16 @@
+defineRouteMeta({
+  openAPI: {
+    tags: ["Two-Factor Authentication (2FA)"],
+    summary: "Initialize 2FA authenticator setup",
+    description: "Generate a TOTP secret and QR code for scanning in Google Authenticator or 1Password. Caches temporary setup key in Redis for 10 minutes.",
+    security: [{ bearerAuth: [] }],
+    responses: {
+      200: { description: "TOTP secret and QR code generated successfully" },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = await requireAuthUser(event)
 

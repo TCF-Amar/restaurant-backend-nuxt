@@ -1,3 +1,20 @@
+defineRouteMeta({
+  openAPI: {
+    tags: ["Passkeys & WebAuthn"],
+    summary: "Delete passkey",
+    description: "Remove a FIDO2 passkey credential from the authenticated account.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Passkey credential ID" },
+    ],
+    responses: {
+      200: { description: "Passkey removed successfully" },
+      401: { description: "Unauthorized" },
+      404: { description: "Passkey not found" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = await requireAuthUser(event)
   const id = getRouterParam(event, "id")

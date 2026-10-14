@@ -1,5 +1,32 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Two-Factor Authentication (2FA)"],
+    summary: "Complete login with 2FA code",
+    description: "Exchange a temporary login token and 6-digit TOTP code for full access and refresh JWT tokens.",
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["tempToken", "code"],
+            properties: {
+              tempToken: { type: "string", description: "Temporary token issued during stage 1 login" },
+              code: { type: "string", example: "123456", description: "6-digit TOTP code" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "2FA login verification successful" },
+      400: { description: "Invalid code or expired session" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
 

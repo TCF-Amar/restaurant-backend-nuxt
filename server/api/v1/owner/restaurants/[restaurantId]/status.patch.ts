@@ -1,5 +1,35 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Owner Restaurants"],
+    summary: "Toggle restaurant active status",
+    description: "Open or close restaurant for taking live orders. If isActive is omitted, inverts the current status.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+    ],
+    requestBody: {
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              isActive: { type: "boolean", description: "Set explicitly to true (open) or false (closed)" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Restaurant status updated" },
+      401: { description: "Unauthorized" },
+      403: { description: "Forbidden" },
+      404: { description: "Restaurant not found" },
+    },
+  },
+})
+
 const toggleStatusSchema = z.object({
   isActive: z.boolean().optional(),
 })

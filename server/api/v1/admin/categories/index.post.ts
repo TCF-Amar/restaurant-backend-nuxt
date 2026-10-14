@@ -1,5 +1,36 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Global & Admin Categories"],
+    summary: "Create category (Global or Restaurant)",
+    description: "Create category entity. Omit restaurantId for platform-wide Global categories (Admin only), or specify restaurantId for outlet-specific categories.",
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["name"],
+            properties: {
+              name: { type: "string", example: "Artisan Breads" },
+              description: { type: "string" },
+              imageUrl: { type: "string" },
+              restaurantId: { type: "string", nullable: true, description: "Omit or pass null for Global" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      201: { description: "Category created successfully" },
+      400: { description: "Validation error" },
+      403: { description: "Forbidden" },
+    },
+  },
+})
+
 const adminCreateCategorySchema = z.object({
   name: z.string().min(1, "Category name is required"),
   description: z.string().optional(),

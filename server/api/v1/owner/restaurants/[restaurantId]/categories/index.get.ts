@@ -1,5 +1,22 @@
 
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Restaurant Categories"],
+    summary: "List restaurant categories",
+    description: "Fetch all active categories for a restaurant, including global system categories and restaurant-specific custom categories.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+    ],
+    responses: {
+      200: { description: "Categories list retrieved successfully" },
+      401: { description: "Unauthorized" },
+      403: { description: "Forbidden" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const restaurantId = getRouterParam(event, "restaurantId")
   if (!restaurantId) {

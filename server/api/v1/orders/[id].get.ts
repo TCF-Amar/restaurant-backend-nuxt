@@ -1,6 +1,36 @@
 import { requireAuth } from "../../../utils/guard"
 import { prisma } from "../../../utils/prisma"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Orders & Checkout"],
+    summary: "Get order details",
+    description: "Fetch comprehensive single order breakdown, including item options, addons, pricing snapshot, customer, and delivery destination.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Order ID" },
+    ],
+    responses: {
+      200: {
+        description: "Order details",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                status: { type: "string", example: "ok" },
+                order: { type: "object" },
+              },
+            },
+          },
+        },
+      },
+      403: { description: "Forbidden" },
+      404: { description: "Order not found" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = requireAuth(event)
   const id = getRouterParam(event, "id")

@@ -1,6 +1,28 @@
 import { requireAuth } from "../../../../utils/guard"
 import { prisma } from "../../../../utils/prisma"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["User Addresses"],
+    summary: "Delete saved address",
+    description: "Remove an address from the user's address book. If the deleted address was default, automatically assigns a remaining address as default.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        required: true,
+        schema: { type: "string" },
+        description: "Address unique ID",
+      },
+    ],
+    responses: {
+      200: { description: "Address deleted successfully" },
+      404: { description: "Address not found" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = requireAuth(event)
   const id = getRouterParam(event, "id")

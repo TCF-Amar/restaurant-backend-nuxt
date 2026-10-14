@@ -2,6 +2,49 @@ import { z } from "zod"
 import { requireAuth } from "../../../../utils/guard"
 import { prisma } from "../../../../utils/prisma"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Orders & Checkout"],
+    summary: "Update order status",
+    description: "Update fulfillment status of an order in the kitchen pipeline (ACCEPTED, PREPARING, READY_FOR_PICKUP, OUT_FOR_DELIVERY, DELIVERED, CANCELLED). Requires Admin or Restaurant Staff access.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Order ID" },
+    ],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["status"],
+            properties: {
+              status: {
+                type: "string",
+                enum: [
+                  "PENDING",
+                  "ACCEPTED",
+                  "PREPARING",
+                  "READY_FOR_PICKUP",
+                  "OUT_FOR_DELIVERY",
+                  "DELIVERED",
+                  "CANCELLED",
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Order status updated successfully" },
+      400: { description: "Invalid order status provided" },
+      403: { description: "Forbidden" },
+      404: { description: "Order not found" },
+    },
+  },
+})
+
 const updateOrderStatusSchema = z.object({
   status: z.enum([
     "PENDING",

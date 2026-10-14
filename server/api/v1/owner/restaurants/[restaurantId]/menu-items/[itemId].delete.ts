@@ -1,5 +1,24 @@
 
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Restaurant Menu Items"],
+    summary: "Delete menu item / dish",
+    description: "Permanently delete a dish from the restaurant menu. Requires MANAGE_MENU_ITEMS permission.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+      { name: "itemId", in: "path", required: true, schema: { type: "string" }, description: "Menu Item ID" },
+    ],
+    responses: {
+      200: { description: "Menu item deleted successfully" },
+      401: { description: "Unauthorized" },
+      403: { description: "Forbidden" },
+      404: { description: "Menu item not found" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const restaurantId = getRouterParam(event, "restaurantId")
   const itemId = getRouterParam(event, "itemId")

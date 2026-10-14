@@ -1,5 +1,44 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Admin User Management"],
+    summary: "Assign restaurant outlet staff & permissions",
+    description: "Grant staff permissions (MANAGE_OUTLET, MANAGE_CATEGORIES, MANAGE_MENU_ITEMS, MANAGE_ORDERS) for a specific restaurant to a user.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "User ID" },
+    ],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["restaurantId", "permissions"],
+            properties: {
+              restaurantId: { type: "string" },
+              permissions: {
+                type: "array",
+                items: {
+                  type: "string",
+                  enum: ["MANAGE_OUTLET", "MANAGE_CATEGORIES", "MANAGE_MENU_ITEMS", "MANAGE_ORDERS"],
+                },
+              },
+              isPrimary: { type: "boolean", default: false },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Restaurant staff assignment saved successfully" },
+      400: { description: "Invalid payload or user/restaurant not found" },
+      403: { description: "Forbidden" },
+    },
+  },
+})
+
 const assignAccessSchema = z.object({
   restaurantId: z.string().min(1, "Restaurant ID is required"),
   permissions: z.array(

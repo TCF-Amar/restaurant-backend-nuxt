@@ -1,5 +1,39 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Restaurant Categories"],
+    summary: "Create new category",
+    description: "Create a restaurant-specific menu category (or a global category if caller is Super Admin). Requires MANAGE_CATEGORIES permission.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+    ],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["name"],
+            properties: {
+              name: { type: "string", example: "Wood-Fired Pizza" },
+              description: { type: "string", example: "Fresh hand-tossed artisanal pizzas" },
+              imageUrl: { type: "string" },
+              isGlobal: { type: "boolean", default: false },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      201: { description: "Category created successfully" },
+      400: { description: "Validation error" },
+      403: { description: "Forbidden" },
+    },
+  },
+})
+
 
 const createCategorySchema = z.object({
   name: z.string().min(1, "Category name is required"),

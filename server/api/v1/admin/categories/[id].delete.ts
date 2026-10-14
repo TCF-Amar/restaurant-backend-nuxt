@@ -1,3 +1,21 @@
+defineRouteMeta({
+  openAPI: {
+    tags: ["Global & Admin Categories"],
+    summary: "Delete category",
+    description: "Delete a category if no dishes or menu items are linked to it. Admins can delete global and restaurant categories; owners can only delete their own.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Category ID" },
+    ],
+    responses: {
+      200: { description: "Category deleted successfully" },
+      400: { description: "Cannot delete category containing dishes" },
+      403: { description: "Forbidden" },
+      404: { description: "Category not found" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const auth = requireAuth(event)
 

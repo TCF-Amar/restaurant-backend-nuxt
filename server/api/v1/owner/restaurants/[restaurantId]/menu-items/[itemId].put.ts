@@ -1,5 +1,44 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Restaurant Menu Items"],
+    summary: "Update menu item / dish",
+    description: "Update dish name, price, stock availability, category, variants, and addons. Requires MANAGE_MENU_ITEMS permission.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+      { name: "itemId", in: "path", required: true, schema: { type: "string" }, description: "Menu Item ID" },
+    ],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              description: { type: "string" },
+              price: { type: "number" },
+              categoryId: { type: "string" },
+              imageUrl: { type: "string" },
+              isAvailable: { type: "boolean" },
+              variants: { type: "array" },
+              addons: { type: "array" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Menu item updated successfully" },
+      400: { description: "Invalid parameters" },
+      403: { description: "Forbidden" },
+      404: { description: "Menu item not found" },
+    },
+  },
+})
+
 
 const variantSchema = z.object({
   name: z.string().min(1, "Variant name is required"),

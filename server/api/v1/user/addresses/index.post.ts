@@ -2,6 +2,58 @@ import { z } from "zod"
 import { requireAuth } from "../../../../utils/guard"
 import { prisma } from "../../../../utils/prisma"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["User Addresses"],
+    summary: "Add new address to address book",
+    description: "Create a new saved delivery address. If marked as default, unmarks all other addresses.",
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["recipientName", "phone", "addressLine1", "city", "state", "postalCode"],
+            properties: {
+              label: { type: "string", example: "Home" },
+              recipientName: { type: "string", example: "John Doe" },
+              phone: { type: "string", example: "+15551234567" },
+              addressLine1: { type: "string", example: "123 Main St, Apt 4B" },
+              addressLine2: { type: "string", nullable: true },
+              landmark: { type: "string", nullable: true },
+              city: { type: "string", example: "New York" },
+              state: { type: "string", example: "NY" },
+              postalCode: { type: "string", example: "10001" },
+              latitude: { type: "number", nullable: true },
+              longitude: { type: "number", nullable: true },
+              isDefault: { type: "boolean", example: true },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      201: {
+        description: "Address created successfully",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                status: { type: "string", example: "ok" },
+                address: { type: "object" },
+              },
+            },
+          },
+        },
+      },
+      400: { description: "Validation error" },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 const createAddressSchema = z.object({
   label: z.string().min(1).default("Home"),
   recipientName: z.string().min(2, "Recipient name must be at least 2 characters"),

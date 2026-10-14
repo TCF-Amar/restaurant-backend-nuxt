@@ -1,5 +1,61 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Restaurant Menu Items"],
+    summary: "Create new menu item / dish",
+    description: "Create a dish with base price, category, photo URL, sizes/variants, and extra addons. Requires MANAGE_MENU_ITEMS permission.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+    ],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["name", "price", "categoryId"],
+            properties: {
+              name: { type: "string", example: "Margherita Pizza" },
+              description: { type: "string", example: "San Marzano tomatoes, buffalo mozzarella, fresh basil" },
+              price: { type: "number", example: 14.99 },
+              categoryId: { type: "string" },
+              imageUrl: { type: "string" },
+              isAvailable: { type: "boolean", default: true },
+              variants: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string", example: "Large (14 inch)" },
+                    price: { type: "number", example: 18.99 },
+                  },
+                },
+              },
+              addons: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    name: { type: "string", example: "Extra Mozzarella" },
+                    price: { type: "number", example: 2.5 },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      201: { description: "Menu item created successfully" },
+      400: { description: "Validation error" },
+      403: { description: "Forbidden" },
+    },
+  },
+})
+
 
 const variantSchema = z.object({
   name: z.string().min(1, "Variant name is required"),

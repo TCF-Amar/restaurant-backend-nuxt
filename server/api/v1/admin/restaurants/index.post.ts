@@ -1,5 +1,39 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Admin Restaurant Management"],
+    summary: "Create new restaurant outlet",
+    description: "Provision a new restaurant entity on the platform. Requires Admin privileges.",
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["name", "slug"],
+            properties: {
+              name: { type: "string", example: "Bistro Napoli" },
+              slug: { type: "string", example: "bistro-napoli" },
+              description: { type: "string" },
+              address: { type: "string" },
+              phone: { type: "string" },
+              logoUrl: { type: "string" },
+              bannerUrl: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      201: { description: "Restaurant created successfully" },
+      400: { description: "Validation error or slug already taken" },
+      403: { description: "Forbidden" },
+    },
+  },
+})
+
 
 const createRestaurantSchema = z.object({
   name: z.string().min(2, "Restaurant name must be at least 2 characters"),

@@ -1,5 +1,32 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Passkeys & WebAuthn"],
+    summary: "Verify passkey assertion & authenticate",
+    description: "Verify signed WebAuthn authentication assertion from client device and establish user session.",
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["response", "challenge"],
+            properties: {
+              response: { type: "object", description: "Authenticator assertion response" },
+              challenge: { type: "string" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Authentication successful, returns tokens and user profile" },
+      400: { description: "Invalid verification response or expired challenge" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event)
   const { rpID, origin } = getWebAuthnConfig(event)

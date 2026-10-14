@@ -1,5 +1,19 @@
 
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Admin Restaurant Management"],
+    summary: "List all restaurants globally",
+    description: "Fetch all restaurants across the platform with owner details and dish counters. Requires Admin privileges.",
+    security: [{ bearerAuth: [] }],
+    responses: {
+      200: { description: "Restaurants list" },
+      401: { description: "Unauthorized" },
+      403: { description: "Forbidden" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   // STRICT: Only ADMIN can list all restaurants globally
   requireAdmin(event)

@@ -1,5 +1,49 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Owner Orders"],
+    summary: "Update restaurant order status",
+    description: "Update status of an order for this restaurant. Requires MANAGE_ORDERS permission.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+      { name: "orderId", in: "path", required: true, schema: { type: "string" }, description: "Order ID" },
+    ],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["status"],
+            properties: {
+              status: {
+                type: "string",
+                enum: [
+                  "PENDING",
+                  "ACCEPTED",
+                  "PREPARING",
+                  "READY_FOR_PICKUP",
+                  "OUT_FOR_DELIVERY",
+                  "DELIVERED",
+                  "CANCELLED",
+                ],
+              },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Order status updated successfully" },
+      400: { description: "Invalid parameters or status" },
+      403: { description: "Forbidden" },
+      404: { description: "Order not found" },
+    },
+  },
+})
+
 
 const updateOrderStatusSchema = z.object({
   status: z.enum([

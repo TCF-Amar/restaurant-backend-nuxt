@@ -1,3 +1,16 @@
+defineRouteMeta({
+  openAPI: {
+    tags: ["Passkeys & WebAuthn"],
+    summary: "Generate passkey registration options",
+    description: "Request WebAuthn attestation challenge and parameters to register a new biometric or hardware passkey.",
+    security: [{ bearerAuth: [] }],
+    responses: {
+      200: { description: "Registration options generated successfully" },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = await requireAuthUser(event)
   const { rpName, rpID } = getWebAuthnConfig(event)

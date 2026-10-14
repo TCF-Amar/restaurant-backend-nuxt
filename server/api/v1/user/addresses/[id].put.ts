@@ -2,6 +2,53 @@ import { z } from "zod"
 import { requireAuth } from "../../../../utils/guard"
 import { prisma } from "../../../../utils/prisma"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["User Addresses"],
+    summary: "Update saved address",
+    description: "Modify an existing saved address by its ID for the authenticated user.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        required: true,
+        schema: { type: "string" },
+        description: "Address unique ID",
+      },
+    ],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              label: { type: "string", example: "Work" },
+              recipientName: { type: "string" },
+              phone: { type: "string" },
+              addressLine1: { type: "string" },
+              addressLine2: { type: "string", nullable: true },
+              landmark: { type: "string", nullable: true },
+              city: { type: "string" },
+              state: { type: "string" },
+              postalCode: { type: "string" },
+              latitude: { type: "number", nullable: true },
+              longitude: { type: "number", nullable: true },
+              isDefault: { type: "boolean" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Address updated successfully" },
+      400: { description: "Invalid address data or parameters" },
+      404: { description: "Address not found" },
+    },
+  },
+})
+
 const updateAddressSchema = z.object({
   label: z.string().min(1).optional(),
   recipientName: z.string().min(2, "Recipient name must be at least 2 characters").optional(),

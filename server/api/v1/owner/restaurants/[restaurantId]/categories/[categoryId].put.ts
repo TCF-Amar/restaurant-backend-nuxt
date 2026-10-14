@@ -1,5 +1,39 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Restaurant Categories"],
+    summary: "Update category",
+    description: "Update restaurant category name, description, or image. Requires MANAGE_CATEGORIES permission.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+      { name: "categoryId", in: "path", required: true, schema: { type: "string" }, description: "Category ID" },
+    ],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              description: { type: "string" },
+              imageUrl: { type: "string", nullable: true },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Category updated successfully" },
+      400: { description: "Invalid parameters" },
+      403: { description: "Forbidden" },
+      404: { description: "Category not found" },
+    },
+  },
+})
+
 
 const updateCategorySchema = z.object({
   name: z.string().min(1).optional(),

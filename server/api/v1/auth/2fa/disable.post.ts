@@ -1,6 +1,34 @@
 import z from "zod"
 import bcrypt from "bcryptjs"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Two-Factor Authentication (2FA)"],
+    summary: "Disable two-factor authentication",
+    description: "Deactivate 2FA security by verifying with either the current 6-digit TOTP code or account password.",
+    security: [{ bearerAuth: [] }],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              code: { type: "string", description: "6-digit TOTP code" },
+              password: { type: "string", description: "Account password" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Two-factor authentication disabled successfully" },
+      400: { description: "Invalid code or password" },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = await requireAuthUser(event)
   const body = await readBody(event)

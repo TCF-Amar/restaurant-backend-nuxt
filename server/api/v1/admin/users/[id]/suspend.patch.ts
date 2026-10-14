@@ -1,5 +1,35 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Admin User Management"],
+    summary: "Suspend or reactivate user account",
+    description: "Toggle account suspension status. If suspended, user active sessions and refresh tokens are immediately revoked.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "User ID" },
+    ],
+    requestBody: {
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              isSuspended: { type: "boolean", description: "Set explicitly or omit to toggle" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "User suspension status updated" },
+      400: { description: "Cannot suspend own admin account" },
+      403: { description: "Forbidden" },
+      404: { description: "User not found" },
+    },
+  },
+})
+
 const suspendSchema = z.object({
   isSuspended: z.boolean().optional(),
 })

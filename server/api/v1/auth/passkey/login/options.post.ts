@@ -1,5 +1,28 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Passkeys & WebAuthn"],
+    summary: "Generate passkey authentication options",
+    description: "Request WebAuthn assertion challenge options for passwordless biometric / security key login.",
+    requestBody: {
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              identifier: { type: "string", description: "Email or phone (optional for discoverable passkey)" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "WebAuthn assertion options and challenge" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const body = await readBody(event).catch(() => ({}))
   const { rpID } = getWebAuthnConfig(event)

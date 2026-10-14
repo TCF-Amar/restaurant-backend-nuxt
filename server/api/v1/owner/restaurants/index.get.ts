@@ -2,6 +2,40 @@
 
 import type { Prisma } from "@prisma/client"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Owner Restaurants"],
+    summary: "List owner assigned restaurants",
+    description: "Fetch paginated restaurants that the authenticated user owns or is assigned to as staff (or all restaurants if Admin).",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "search", in: "query", schema: { type: "string" }, description: "Search by restaurant name, slug, or address" },
+      { name: "status", in: "query", schema: { type: "string", enum: ["ALL", "ACTIVE", "INACTIVE"] }, description: "Filter by status" },
+      { name: "page", in: "query", schema: { type: "integer", default: 1 } },
+      { name: "limit", in: "query", schema: { type: "integer", default: 9 } },
+      { name: "all", in: "query", schema: { type: "boolean" } },
+    ],
+    responses: {
+      200: {
+        description: "List of restaurants",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                status: { type: "string", example: "ok" },
+                restaurants: { type: "array" },
+                pagination: { type: "object" },
+              },
+            },
+          },
+        },
+      },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const auth = requireAuth(event)
 

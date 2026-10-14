@@ -1,5 +1,44 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Admin Restaurant Management"],
+    summary: "Assign user to restaurant outlet",
+    description: "Assign a user to a restaurant with specific management permissions and primary owner flag. Promotes user role to RESTAURANT_OWNER if currently CUSTOMER.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+    ],
+    requestBody: {
+      required: true,
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            required: ["userId", "permissions"],
+            properties: {
+              userId: { type: "string" },
+              permissions: {
+                type: "array",
+                items: {
+                  type: "string",
+                  enum: ["MANAGE_OUTLET", "MANAGE_CATEGORIES", "MANAGE_MENU_ITEMS", "MANAGE_ORDERS"],
+                },
+              },
+              isPrimary: { type: "boolean", default: false },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Owner assigned successfully" },
+      400: { description: "Invalid parameters or user/restaurant not found" },
+      403: { description: "Forbidden" },
+    },
+  },
+})
+
 
 const assignOwnerSchema = z.object({
   userId: z.string().min(1, "User ID is required"),

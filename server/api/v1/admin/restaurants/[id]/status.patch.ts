@@ -1,5 +1,35 @@
 import z from "zod"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Admin Restaurant Management"],
+    summary: "Toggle restaurant status by ID",
+    description: "Activate or deactivate restaurant outlet using path parameter ID. Requires Admin privileges.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+    ],
+    requestBody: {
+      content: {
+        "application/json": {
+          schema: {
+            type: "object",
+            properties: {
+              isActive: { type: "boolean" },
+            },
+          },
+        },
+      },
+    },
+    responses: {
+      200: { description: "Restaurant status updated" },
+      400: { description: "Invalid ID" },
+      403: { description: "Forbidden" },
+      404: { description: "Restaurant not found" },
+    },
+  },
+})
+
 const toggleSchema = z.object({
   isActive: z.boolean().optional(),
 })

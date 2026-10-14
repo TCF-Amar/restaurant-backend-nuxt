@@ -1,3 +1,16 @@
+defineRouteMeta({
+  openAPI: {
+    tags: ["Passkeys & WebAuthn"],
+    summary: "List registered passkeys",
+    description: "Fetch registered FIDO2 / WebAuthn passkey credentials for the authenticated account.",
+    security: [{ bearerAuth: [] }],
+    responses: {
+      200: { description: "Passkeys list retrieved successfully" },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = await requireAuthUser(event)
 

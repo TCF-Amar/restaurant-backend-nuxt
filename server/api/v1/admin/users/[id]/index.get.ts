@@ -1,3 +1,21 @@
+defineRouteMeta({
+  openAPI: {
+    tags: ["Admin User Management"],
+    summary: "Get user details & outlet staffings",
+    description: "Fetch comprehensive profile, saved addresses from Flutter app, outlet staff assignments, and diagnostic counters. Requires Admin privileges.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "id", in: "path", required: true, schema: { type: "string" }, description: "User ID" },
+    ],
+    responses: {
+      200: { description: "User details retrieved successfully" },
+      401: { description: "Unauthorized" },
+      403: { description: "Forbidden - Requires Admin role" },
+      404: { description: "User not found" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   requireAdmin(event)
 

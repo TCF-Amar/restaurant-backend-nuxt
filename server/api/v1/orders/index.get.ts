@@ -2,6 +2,40 @@ import { requireAuth } from "../../../utils/guard"
 import { prisma } from "../../../utils/prisma"
 import { getPaginationParams, formatPaginationMeta } from "../../../utils/pagination"
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Orders & Checkout"],
+    summary: "List orders feed & history",
+    description: "Fetch paginated orders. Customers receive their order history; Restaurant Owners and Admins receive store orders with status and restaurant filters.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "query", schema: { type: "string" }, description: "Filter by restaurant ID" },
+      { name: "status", in: "query", schema: { type: "string" }, description: "Filter by OrderStatus (PENDING, PREPARING, DELIVERED, etc.)" },
+      { name: "page", in: "query", schema: { type: "integer", default: 1 }, description: "Pagination page" },
+      { name: "limit", in: "query", schema: { type: "integer", default: 10 }, description: "Items per page" },
+      { name: "all", in: "query", schema: { type: "boolean" }, description: "Return all records without pagination" },
+    ],
+    responses: {
+      200: {
+        description: "Orders retrieved successfully",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                status: { type: "string", example: "ok" },
+                orders: { type: "array" },
+                pagination: { type: "object" },
+              },
+            },
+          },
+        },
+      },
+      401: { description: "Unauthorized" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const claims = requireAuth(event)
   const query = getQuery(event)

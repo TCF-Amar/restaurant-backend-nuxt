@@ -1,5 +1,23 @@
 
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Owner Restaurants"],
+    summary: "Get restaurant details & counts",
+    description: "Fetch comprehensive profile, metrics, staff roles, and categories for a specific restaurant.",
+    security: [{ bearerAuth: [] }],
+    parameters: [
+      { name: "restaurantId", in: "path", required: true, schema: { type: "string" }, description: "Restaurant ID" },
+    ],
+    responses: {
+      200: { description: "Restaurant details and permissions" },
+      401: { description: "Unauthorized" },
+      403: { description: "Forbidden" },
+      404: { description: "Restaurant not found" },
+    },
+  },
+})
+
 export default defineEventHandler(async (event) => {
   const restaurantId = getRouterParam(event, "restaurantId")
   if (!restaurantId) {
