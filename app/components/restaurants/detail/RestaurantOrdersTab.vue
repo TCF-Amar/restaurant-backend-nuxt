@@ -3,7 +3,7 @@
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
       <div>
         <h2 class="text-base font-bold text-white">Orders Board & Fulfillment</h2>
-        <p class="text-xs text-slate-400">Recent customer requests for {{ restaurantName }}</p>
+        <p class="text-xs text-slate-400">Incoming Flutter mobile app customer requests for {{ restaurantName }}</p>
       </div>
 
       <NuxtLink :to="`/orders?restaurantId=${restaurantId}`"
@@ -20,20 +20,33 @@
           <tr class="border-b border-white/[0.08] text-slate-400">
             <th class="pb-3 font-semibold">Order ID</th>
             <th class="pb-3 font-semibold">Customer</th>
+            <th class="pb-3 font-semibold">Delivery Location</th>
             <th class="pb-3 font-semibold">Items</th>
             <th class="pb-3 font-semibold">Total</th>
             <th class="pb-3 font-semibold">Status</th>
             <th class="pb-3 font-semibold">Created</th>
+            <th class="pb-3 font-semibold text-right">Action</th>
           </tr>
         </thead>
         <tbody class="divide-y divide-white/[0.05]">
-          <tr v-for="order in orders" :key="order.id" class="hover:bg-white/[0.03] transition">
-            <td class="py-3 font-mono text-[11px] text-indigo-300">
-              #{{ order.id.slice(0, 8) }}
+          <tr
+            v-for="order in orders"
+            :key="order.id"
+            @click="activeOrder = order"
+            class="hover:bg-white/[0.03] transition cursor-pointer group"
+          >
+            <td class="py-3 font-mono text-[11px] text-indigo-300 font-semibold">
+              #{{ order.orderNumber || order.id.slice(0, 8) }}
             </td>
             <td class="py-3">
-              <span class="text-white font-medium">{{ order.user?.name || 'Customer' }}</span>
-              <p class="text-[10px] text-slate-400">{{ order.user?.phone || '' }}</p>
+              <span class="text-white font-medium block">{{ order.user?.name || 'Customer' }}</span>
+              <p class="text-[10px] text-slate-400">{{ order.deliveryAddress?.phone || order.user?.phone || '' }}</p>
+            </td>
+            <td class="py-3 max-w-[180px] truncate text-slate-300 text-[11px]">
+              <span v-if="order.deliveryAddress">
+                {{ order.deliveryAddress.addressLine1 }}, {{ order.deliveryAddress.city }}
+              </span>
+              <span v-else class="text-slate-500 italic">Pickup / None</span>
             </td>
             <td class="py-3 text-slate-300">
               {{ order.items?.length || 0 }} item(s)
@@ -52,6 +65,15 @@
             <td class="py-3 text-slate-400 text-[11px]">
               {{ formatDate(order.createdAt) }}
             </td>
+            <td class="py-3 text-right">
+              <button
+                @click.stop="activeOrder = order"
+                type="button"
+                class="px-2.5 py-1 rounded-lg bg-indigo-500/15 hover:bg-indigo-500/30 text-indigo-300 border border-indigo-500/30 text-[11px] font-medium transition cursor-pointer"
+              >
+                Inspect
+              </button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -67,16 +89,25 @@
       <LucideShoppingBag class="w-10 h-10 text-slate-500 mx-auto" />
       <h3 class="text-sm font-semibold text-white">No Orders Received Yet</h3>
       <p class="text-xs text-slate-400 max-w-sm mx-auto">
-        Once customers start ordering from {{ restaurantName }}, incoming live kitchen tickets will appear here.
+        Once customers start ordering from {{ restaurantName }} via the Flutter mobile app, incoming live kitchen tickets will appear here.
       </p>
     </div>
+
+    <!-- Order Detail & Pipeline Modal -->
+    <OrderDetailModal
+      :is-open="!!activeOrder"
+      :order="activeOrder"
+      @close="activeOrder = null"
+      @updated="onOrderUpdated"
+    />
   </div>
 </template>
 
 <script setup lang="ts">
 import AppPagination from '~/components/AppPagination.vue'
+import OrderDetailModal from '~/components/orders/OrderDetailModal.vue'
 
-defineProps<{
+const props = defineProps<{
   restaurantId: string
   restaurantName: string
   orders: any[]
@@ -89,9 +120,21 @@ defineProps<{
   }
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   (e: 'page-change', page: number): void
+  (e: 'order-updated', order: any): void
 }>()
+
+const activeOrder = ref<any | null>(null)
+
+function onOrderUpdated(updated: any) {
+  const idx = props.orders.findIndex((o) => o.id === updated.id)
+  if (idx !== -1) {
+    props.orders[idx] = { ...props.orders[idx], ...updated }
+  }
+  activeOrder.value = updated
+  emit('order-updated', updated)
+}
 
 function formatDate(dateString?: string) {
   if (!dateString) return '—'

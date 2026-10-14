@@ -80,6 +80,12 @@
           v-if="activeTab === 'sessions'"
           @notify="onNotify"
         />
+
+        <!-- TAB 6: Saved Addresses -->
+        <SettingsAddressTab
+          v-if="activeTab === 'addresses'"
+          @notify="onNotify"
+        />
       </div>
     </div>
   </div>
@@ -92,6 +98,7 @@ import SettingsSecurityTab from '~/components/settings/SettingsSecurityTab.vue'
 import SettingsAppearanceTab from '~/components/settings/SettingsAppearanceTab.vue'
 import SettingsNotificationsTab from '~/components/settings/SettingsNotificationsTab.vue'
 import SettingsSessionsTab from '~/components/settings/SettingsSessionsTab.vue'
+import SettingsAddressTab from '~/components/settings/SettingsAddressTab.vue'
 
 const { user } = useAuth()
 
@@ -104,6 +111,7 @@ const tabs = [
   { id: 'security', label: 'Security & Password', icon: 'LucideShield' },
   { id: 'appearance', label: 'Interface & Glass UI', icon: 'LucidePalette' },
   { id: 'notifications', label: 'Notifications', icon: 'LucideBell' },
+  { id: 'addresses', label: 'Saved Addresses', icon: 'LucideMapPin' },
   { id: 'sessions', label: 'Active Sessions', icon: 'LucideLaptop' },
 ]
 

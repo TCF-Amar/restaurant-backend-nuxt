@@ -19,7 +19,13 @@ export default defineEventHandler(async (event) => {
       phoneVerifiedAt: true,
       createdAt: true,
       updatedAt: true,
-      profile: true,
+      profile: {
+        include: {
+          addresses: {
+            orderBy: [{ isDefault: "desc" }, { createdAt: "desc" }],
+          },
+        },
+      },
       _count: {
         select: {
           orders: true,
