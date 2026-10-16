@@ -42,6 +42,15 @@ defineRouteMeta({
 
 export default defineEventHandler(async (event) => {
   const claims = requireAuth(event)
+
+  // Payment history is strictly restricted to ADMIN - Never shown to Restaurant Owners or Customers
+  if (claims.role !== "ADMIN") {
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Forbidden: Payment history is strictly restricted to Administrators",
+    })
+  }
+
   const query = getQuery(event)
 
   const { page, limit, skip } = getPaginationParams(event, 10)
@@ -52,35 +61,8 @@ export default defineEventHandler(async (event) => {
 
   let where: any = {}
 
-  if (claims.role === "ADMIN") {
-    if (query.restaurantId) {
-      where.restaurantId = String(query.restaurantId)
-    }
-  } else if (claims.role === "RESTAURANT_OWNER") {
-    // Restrict to restaurants the owner is assigned to
-    const staffEntries = await prisma.restaurantStaff.findMany({
-      where: { userId: claims.sub },
-      select: { restaurantId: true },
-    })
-    const allowedRestaurantIds = staffEntries.map((s) => s.restaurantId)
-
-    if (allowedRestaurantIds.length === 0) {
-      return {
-        status: "ok",
-        payments: [],
-        pagination: formatPaginationMeta(0, page, limit),
-        stats: { totalVolume: "0.00", completedCount: 0, pendingCount: 0, refundedCount: 0 },
-      }
-    }
-
-    if (query.restaurantId && allowedRestaurantIds.includes(String(query.restaurantId))) {
-      where.restaurantId = String(query.restaurantId)
-    } else {
-      where.restaurantId = { in: allowedRestaurantIds }
-    }
-  } else {
-    // Normal customers only see their own payments
-    where.userId = claims.sub
+  if (query.restaurantId) {
+    where.restaurantId = String(query.restaurantId)
   }
 
   if (statusFilter) {

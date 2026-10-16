@@ -15,6 +15,8 @@ export interface User {
   email: string | null
   phone: string | null
   role: string
+  emailVerifiedAt?: string | null
+  phoneVerifiedAt?: string | null
   twoFactorEnabled?: boolean
   createdAt: string
   profile: UserProfile | null
@@ -71,6 +73,10 @@ export const useAuth = () => {
     return isSuperAdmin.value
   })
 
+  const canAccessPayments = computed(() => {
+    return isSuperAdmin.value
+  })
+
   const canAccessDocs = computed(() => {
     return isSuperAdmin.value
   })
@@ -115,6 +121,7 @@ export const useAuth = () => {
     canAccessRestaurants,
     canAccessCategories,
     canAccessOrders,
+    canAccessPayments,
     canAccessUsers,
     canAccessDocs,
     authError,

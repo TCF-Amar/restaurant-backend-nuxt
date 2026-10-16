@@ -1,5 +1,20 @@
 <template>
-  <div class="max-w-7xl mx-auto space-y-6">
+  <!-- Restricted Access State for Non-Admins (Restaurant Owners / Customers) -->
+  <div v-if="!isSuperAdmin" class="max-w-4xl mx-auto p-12 text-center rounded-3xl glass-card border border-white/10 space-y-4">
+    <div class="w-12 h-12 mx-auto rounded-2xl bg-rose-500/20 border border-rose-500/30 flex items-center justify-center text-rose-300">
+      <LucideLock class="w-6 h-6" />
+    </div>
+    <h2 class="text-lg font-bold text-white">Payment History Restricted</h2>
+    <p class="text-xs text-slate-400 max-w-md mx-auto">
+      Payment history and financial records are strictly restricted to System Administrators. Restaurant owners cannot view payment ledgers.
+    </p>
+    <NuxtLink to="/orders" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-indigo-600 text-white text-xs font-semibold hover:bg-indigo-500 transition cursor-pointer">
+      <LucideShoppingBag class="w-4 h-4" />
+      <span>Go to Orders Feed</span>
+    </NuxtLink>
+  </div>
+
+  <div v-else class="max-w-7xl mx-auto space-y-6">
     <!-- Top Hero Banner Component -->
     <PaymentHero
       :stats="stats"
@@ -35,6 +50,7 @@
 
 <script setup lang="ts">
 const api = useApi()
+const { isSuperAdmin } = useAuth()
 
 const paymentsList = ref<any[]>([])
 const isLoading = ref(true)
@@ -62,6 +78,10 @@ const stats = ref({
 const selectedPayment = ref<any | null>(null)
 
 async function loadPayments() {
+  if (!isSuperAdmin.value) {
+    isLoading.value = false
+    return
+  }
   isLoading.value = true
   try {
     const res = await api.get<any>('/api/v1/payments', {

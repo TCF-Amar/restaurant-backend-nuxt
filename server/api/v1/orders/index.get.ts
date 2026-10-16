@@ -51,11 +51,36 @@ export default defineEventHandler(async (event) => {
     // Admin can see any orders, optionally filter by restaurantId, userId, status
     if (query.restaurantId) where.restaurantId = String(query.restaurantId)
     if (query.userId) where.userId = String(query.userId)
-  } else if (claims.role === "RESTAURANT_OWNER" && query.restaurantId) {
-    // Owner viewing orders for their restaurant
-    where.restaurantId = String(query.restaurantId)
+  } else if (claims.role === "RESTAURANT_OWNER") {
+    // Restaurant Owner: strictly show only orders for their assigned restaurants
+    const staffEntries = await prisma.restaurantStaff.findMany({
+      where: { userId: claims.sub },
+      select: { restaurantId: true },
+    })
+    const assignedRestaurantIds = staffEntries.map((s) => s.restaurantId)
+
+    if (assignedRestaurantIds.length === 0) {
+      return {
+        status: "ok",
+        orders: [],
+        pagination: formatPaginationMeta(0, page, limit),
+      }
+    }
+
+    if (query.restaurantId) {
+      const requestedId = String(query.restaurantId)
+      if (!assignedRestaurantIds.includes(requestedId)) {
+        throw createError({
+          statusCode: 403,
+          statusMessage: "Forbidden: You are not assigned to this restaurant outlet",
+        })
+      }
+      where.restaurantId = requestedId
+    } else {
+      where.restaurantId = { in: assignedRestaurantIds }
+    }
   } else {
-    // Customer (or owner viewing their own customer orders)
+    // Customer can only view their own orders
     where.userId = claims.sub
   }
 

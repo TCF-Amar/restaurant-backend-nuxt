@@ -66,18 +66,12 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: "Payment record not found" })
   }
 
-  // Authorization check
+  // Authorization check: Only ADMIN can view and modify payment transactions
   if (claims.role !== "ADMIN") {
-    if (claims.role === "RESTAURANT_OWNER") {
-      const isStaff = await prisma.restaurantStaff.findFirst({
-        where: { userId: claims.sub, restaurantId: payment.restaurantId },
-      })
-      if (!isStaff) {
-        throw createError({ statusCode: 403, statusMessage: "Forbidden: Not assigned to this restaurant outlet" })
-      }
-    } else {
-      throw createError({ statusCode: 403, statusMessage: "Forbidden: Admin or Owner privileges required" })
-    }
+    throw createError({
+      statusCode: 403,
+      statusMessage: "Forbidden: Only administrators can update payment transactions",
+    })
   }
 
   const { status, refundReason } = parsed.data

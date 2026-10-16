@@ -79,27 +79,18 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: "Order not found" })
   }
 
-  // Authorization check: User must be ADMIN or owner/staff of the restaurant
+  // Authorization check: User must be ADMIN or staff of the restaurant with MANAGE_ORDERS
   if (claims.role !== "ADMIN") {
-    const isOwnerOrStaff = await prisma.restaurant.findFirst({
+    const isOwnerOrStaff = await prisma.restaurantStaff.findFirst({
       where: {
-        id: order.restaurantId,
-        OR: [
-          { ownerId: claims.sub },
-          {
-            staff: {
-              some: {
-                userId: claims.sub,
-                permissions: { has: "MANAGE_ORDERS" },
-              },
-            },
-          },
-        ],
+        restaurantId: order.restaurantId,
+        userId: claims.sub,
+        permissions: { has: "MANAGE_ORDERS" },
       },
     })
 
     if (!isOwnerOrStaff) {
-      throw createError({ statusCode: 403, statusMessage: "Forbidden: You cannot modify this order" })
+      throw createError({ statusCode: 403, statusMessage: "Forbidden: You cannot modify orders for this restaurant outlet" })
     }
   }
 

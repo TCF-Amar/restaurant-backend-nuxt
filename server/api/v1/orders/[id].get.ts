@@ -77,12 +77,16 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 404, statusMessage: "Order not found" })
   }
 
-  // Authorization check: Customer can only view their own order; Owners can view orders for their restaurant; Admins can view any
+  // Authorization check: Customer can only view their own order; Owners can view orders for their assigned restaurant; Admins can view any
   if (claims.role !== "ADMIN" && order.userId !== claims.sub) {
-    const isOwner = await prisma.restaurant.findFirst({
-      where: { id: order.restaurantId, ownerId: claims.sub },
-    })
-    if (!isOwner) {
+    if (claims.role === "RESTAURANT_OWNER") {
+      const isStaff = await prisma.restaurantStaff.findFirst({
+        where: { restaurantId: order.restaurantId, userId: claims.sub },
+      })
+      if (!isStaff) {
+        throw createError({ statusCode: 403, statusMessage: "Forbidden: You are not assigned to this restaurant outlet" })
+      }
+    } else {
       throw createError({ statusCode: 403, statusMessage: "Forbidden: You cannot access this order" })
     }
   }

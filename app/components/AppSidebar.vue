@@ -72,7 +72,8 @@
                   class="absolute left-0 top-2 bottom-2 w-1 rounded-r-full bg-indigo-400 shadow-[0_0_8px_rgba(99,102,241,1)]"></span>
 
                 <!-- Icon -->
-                <AppSidebarIcon :name="item.icon" class-names="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
+                <AppSidebarIcon :name="item.icon"
+                  class-names="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
                   :class="isActiveRoute(item.path) ? 'text-indigo-300' : 'text-slate-400 group-hover:text-slate-200'" />
 
                 <!-- Label & Badge (Shown only when open) -->
@@ -114,7 +115,8 @@
                   : 'text-slate-300 hover:text-white hover:bg-white/[0.06] border border-transparent'
               ]">
                 <!-- Icon -->
-                <AppSidebarIcon :name="item.icon" class-names="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
+                <AppSidebarIcon :name="item.icon"
+                  class-names="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
                   :class="isActiveRoute(item.path) ? 'text-indigo-300' : 'text-slate-400 group-hover:text-slate-200'" />
 
                 <div v-if="!isCollapsed" class="flex items-center justify-between flex-1 overflow-hidden">
@@ -155,7 +157,8 @@
                   : 'text-slate-300 hover:text-white hover:bg-white/[0.06] border border-transparent'
               ]">
                 <!-- Icon -->
-                <AppSidebarIcon :name="item.icon" class-names="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
+                <AppSidebarIcon :name="item.icon"
+                  class-names="w-5 h-5 shrink-0 transition-transform group-hover:scale-110"
                   :class="isActiveRoute(item.path) ? 'text-indigo-300' : 'text-slate-400 group-hover:text-slate-200'" />
 
                 <div v-if="!isCollapsed" class="flex items-center justify-between flex-1 overflow-hidden">
@@ -250,6 +253,7 @@ const {
   canAccessRestaurants,
   canAccessCategories,
   canAccessOrders,
+  canAccessPayments,
   canAccessUsers,
   canAccessDocs,
 } = useAuth()
@@ -309,14 +313,14 @@ const managementNavItems = computed<NavItem[]>(() => {
     items.push({ label: 'Orders Feed', path: '/orders', icon: 'LucideShoppingBag' })
   }
 
-  // 4. Payments: shown if admin OR if restaurant owner
-  if (isSuperAdmin.value || canAccessRestaurants.value) {
+  // 4. Payments: ONLY for admin; NEVER for restaurant owner or customer
+  if (canAccessPayments.value) {
     items.push({ label: 'Payments', path: '/payments', icon: 'LucideCreditCard' })
   }
 
-  // 5. Users & Roles: ONLY for admin; NEVER for restaurant owner or customer
+  // 5. Customer Management: ONLY for admin; separate user management dedicated to customers
   if (canAccessUsers.value) {
-    items.push({ label: 'Users & Roles', path: '/users', icon: 'LucideUsers' })
+    items.push({ label: 'Accounts', path: '/users', icon: 'LucideUsers' })
   }
 
   return items
