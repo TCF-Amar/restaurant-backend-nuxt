@@ -70,7 +70,7 @@ export async function cacheSessionActive(
  */
 export async function invalidateSessionCache(sessionId: string): Promise<void> {
   try {
-    await redis.del(getCacheKey(sessionId))
+    await redis.del(getCacheKey(sessionId), `auth:session:prev:${sessionId}`)
     console.log(`[session-cache] Invalidation complete for session: ${sessionId}`)
   } catch (err: unknown) {
     console.warn("[session-cache] Redis del error:", err)
@@ -159,6 +159,33 @@ export async function refreshSession(
   }
 
   if (session.tokenHash !== presentedHash) {
+    // Check if this token was just rotated within the 30-second grace window (concurrent in-flight requests)
+    let isWithinGrace = false
+    try {
+      const prevHash = await redis.get(`auth:session:prev:${sid}`)
+      if (prevHash && prevHash === presentedHash) {
+        isWithinGrace = true
+      }
+    } catch (err) {
+      console.warn(`[session-refresh] Redis error checking grace window:`, err)
+    }
+
+    if (isWithinGrace) {
+      console.log(`[session-refresh] Concurrent in-flight request accepted within grace period for session '${sid}'`)
+      const claims: AccessClaims = {
+        sub: session.user.id,
+        sid: session.id,
+        role: session.user.role,
+      }
+      const accessToken = await signAccessToken(claims)
+      setAuthCookies(event, { accessToken })
+      return {
+        claims,
+        accessToken,
+        refreshToken: presented,
+      }
+    }
+
     console.warn(`[session-refresh] Failed: Token hash mismatch for session '${sid}' (possible reuse or already rotated)`)
     clearAuthCookies(event)
     await invalidateSessionCache(sid)
@@ -180,6 +207,14 @@ export async function refreshSession(
 
   // Rotate to new refresh token
   const next = newRefreshToken(sid)
+
+  // Store the previous token hash in Redis for a 30s grace window to absorb in-flight concurrent requests
+  try {
+    await redis.setex(`auth:session:prev:${sid}`, 30, session.tokenHash)
+  } catch (err) {
+    console.warn(`[session-refresh] Failed to set grace window in Redis:`, err)
+  }
+
   await prisma.session.update({
     where: { id: sid },
     data: {

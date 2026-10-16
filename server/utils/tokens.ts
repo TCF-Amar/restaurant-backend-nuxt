@@ -74,12 +74,21 @@ export function newRefreshToken(sessionId: string): { token: string; hash: strin
   return { token, hash: sha256(token) }
 }
 
+const isSecureRequest = (event?: H3Event): boolean => {
+  if (process.env.NODE_ENV === "production") return true
+  if (event) {
+    const proto = getHeader(event, "x-forwarded-proto")
+    if (proto === "https") return true
+  }
+  return false
+}
+
 /**
  * Cookie options helper
  */
-const cookieBase = () => ({
+const cookieBase = (event?: H3Event) => ({
   httpOnly: true,
-  secure: process.env.NODE_ENV === "production",
+  secure: isSecureRequest(event),
   sameSite: "lax" as const,
   path: "/",
 })
@@ -91,13 +100,14 @@ export function setAuthCookies(
   event: H3Event,
   tokens: { accessToken: string; refreshToken?: string }
 ): void {
+  const options = cookieBase(event)
   setCookie(event, "access_token", tokens.accessToken, {
-    ...cookieBase(),
+    ...options,
     maxAge: ACCESS_TTL_SECONDS,
   })
   if (tokens.refreshToken) {
     setCookie(event, "refresh_token", tokens.refreshToken, {
-      ...cookieBase(),
+      ...options,
       maxAge: Math.floor(REFRESH_TTL_MS / 1000),
     })
   }
@@ -107,8 +117,9 @@ export function setAuthCookies(
  * Clear authentication cookies
  */
 export function clearAuthCookies(event: H3Event): void {
-  deleteCookie(event, "access_token", cookieBase())
-  deleteCookie(event, "refresh_token", cookieBase())
+  const options = cookieBase(event)
+  deleteCookie(event, "access_token", options)
+  deleteCookie(event, "refresh_token", options)
 }
 
 /**

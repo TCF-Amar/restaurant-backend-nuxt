@@ -183,10 +183,25 @@ watch(activeTab, () => {
   loadUsers()
 })
 
-// Watch filters to reset page to 1
-watch([selectedStatus, selectedRole, searchQuery], () => {
+let searchDebounceTimer: ReturnType<typeof setTimeout> | null = null
+
+// Watch search with a 350ms debounce
+watch(searchQuery, () => {
+  currentPage.value = 1
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer)
+  searchDebounceTimer = setTimeout(() => {
+    loadUsers()
+  }, 350)
+})
+
+// Watch static dropdown filters to reload immediately
+watch([selectedStatus, selectedRole], () => {
   currentPage.value = 1
   loadUsers()
+})
+
+onUnmounted(() => {
+  if (searchDebounceTimer) clearTimeout(searchDebounceTimer)
 })
 
 async function toggleSuspendUser(user: any) {
