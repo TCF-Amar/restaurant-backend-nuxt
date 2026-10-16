@@ -57,19 +57,23 @@ export default defineEventHandler(async (event) => {
 
   const schema = z.object({
     name: z.string().min(2).max(100),
-    email: z.string().email(),
+    email: z.string().email().optional().or(z.literal("")),
+    phone: z.string().min(6).optional().or(z.literal("")),
     password: z.string().min(6).max(100),
-    phone: z.string().optional(),
+  }).refine((data) => !!data.email || !!data.phone, {
+    message: "Either email address or mobile phone number is required",
   })
 
   const validatedData = schema.parse(body)
+  const cleanEmail = validatedData.email ? validatedData.email.trim().toLowerCase() : null
+  const cleanPhone = validatedData.phone ? validatedData.phone.trim() : null
 
   // Check if email or phone is already taken
   const existingUser = await prisma.user.findFirst({
     where: {
       OR: [
-        { email: validatedData.email },
-        ...(validatedData.phone ? [{ phone: validatedData.phone }] : []),
+        ...(cleanEmail ? [{ email: cleanEmail }] : []),
+        ...(cleanPhone ? [{ phone: cleanPhone }] : []),
       ],
     },
   })
@@ -77,7 +81,7 @@ export default defineEventHandler(async (event) => {
   if (existingUser) {
     throw createError({
       statusCode: 400,
-      statusMessage: "An account with this email or phone already exists",
+      statusMessage: "An account with this email or phone number already exists",
     })
   }
 
@@ -86,9 +90,9 @@ export default defineEventHandler(async (event) => {
 
   const user = await prisma.user.create({
     data: {
-      name: validatedData.name,
-      email: validatedData.email,
-      phone: validatedData.phone || null,
+      name: validatedData.name.trim(),
+      email: cleanEmail,
+      phone: cleanPhone,
       password: hashedPassword,
     },
     select: {

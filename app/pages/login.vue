@@ -62,17 +62,47 @@
           @click="resetToLogin"
           class="w-full text-center text-xs text-indigo-300 hover:text-white transition cursor-pointer"
         >
-          ← Back to Email / Password
+          ← Back to Sign In
         </button>
       </div>
 
-      <!-- STEP 1: Standard Login Form + Passkey Option -->
+      <!-- STEP 1: Login Form (Password OR OTP) -->
       <div v-else class="space-y-4">
-        <form @submit.prevent="handleLogin" class="space-y-4">
+        <!-- Auth Mode Switcher -->
+        <div class="flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs">
+          <button
+            type="button"
+            @click="authMode = 'password'"
+            :class="[
+              'flex-1 py-1.5 rounded-lg font-semibold transition cursor-pointer text-center',
+              authMode === 'password'
+                ? 'bg-indigo-600/40 text-white border border-indigo-500/50 shadow-sm'
+                : 'text-white/60 hover:text-white'
+            ]"
+          >
+            Password
+          </button>
+          <button
+            type="button"
+            @click="authMode = 'otp'"
+            :class="[
+              'flex-1 py-1.5 rounded-lg font-semibold transition cursor-pointer text-center flex items-center justify-center gap-1.5',
+              authMode === 'otp'
+                ? 'bg-indigo-600/40 text-white border border-indigo-500/50 shadow-sm'
+                : 'text-white/60 hover:text-white'
+            ]"
+          >
+            <LucideSmartphone class="w-3.5 h-3.5" />
+            <span>OTP Code</span>
+          </button>
+        </div>
+
+        <!-- MODE A: Standard Password Login -->
+        <form v-if="authMode === 'password'" @submit.prevent="handleLogin" class="space-y-4">
           <!-- Identifier -->
           <div class="space-y-1.5">
             <label class="block text-xs text-white/80 font-medium">Email or Phone</label>
-            <input v-model="identifier" type="text" required placeholder="name@example.com"
+            <input v-model="identifier" type="text" required placeholder="name@example.com or phone"
               class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
           </div>
 
@@ -88,13 +118,98 @@
               class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
           </div>
 
-          <!-- Glass Submit Button -->
+          <!-- Submit Button -->
           <button type="submit" :disabled="isLoading"
             class="w-full py-2.5 px-4 bg-white/20 hover:bg-white/30 border border-white/30 disabled:opacity-50 text-white font-semibold text-sm rounded-xl backdrop-blur-md shadow-lg transition active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2">
             <LucideLoader2 v-if="isLoading && !isPasskeyLoading" class="w-4 h-4 animate-spin" />
             <span>{{ isLoading && !isPasskeyLoading ? 'Signing in...' : 'Sign In with Password' }}</span>
           </button>
         </form>
+
+        <!-- MODE B: OTP Login (for Admins, Owners, Customers) -->
+        <div v-else class="space-y-4">
+          <!-- Sub-step 1: Request OTP -->
+          <form v-if="!otpSent" @submit.prevent="handleSendOtp" class="space-y-4">
+            <div class="space-y-1.5">
+              <label class="block text-xs text-white/80 font-medium">Email or Mobile Number</label>
+              <input
+                v-model="otpIdentifier"
+                type="text"
+                required
+                placeholder="+15551234567 or user@example.com"
+                class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition"
+              />
+              <p class="text-[11px] text-white/50">
+                A 6-digit login verification code will be sent to this email or phone.
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              :disabled="isLoading || !otpIdentifier.trim()"
+              class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/40 disabled:opacity-50 text-white font-semibold text-sm rounded-xl backdrop-blur-md shadow-lg transition active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
+            >
+              <LucideLoader2 v-if="isLoading" class="w-4 h-4 animate-spin" />
+              <LucideSend v-else class="w-4 h-4" />
+              <span>{{ isLoading ? 'Sending Code...' : 'Send Login OTP' }}</span>
+            </button>
+          </form>
+
+          <!-- Sub-step 2: Verify OTP -->
+          <form v-else @submit.prevent="handleVerifyOtp" class="space-y-4">
+            <div class="space-y-1.5">
+              <div class="flex items-center justify-between">
+                <label class="block text-xs text-white/80 font-medium">6-Digit Code</label>
+                <button
+                  type="button"
+                  @click="otpSent = false"
+                  class="text-[11px] text-indigo-300 hover:text-white transition cursor-pointer"
+                >
+                  Change {{ otpIdentifier.includes('@') ? 'email' : 'phone' }}
+                </button>
+              </div>
+              <input
+                v-model="otpCode"
+                type="text"
+                inputmode="numeric"
+                pattern="[0-9]*"
+                maxlength="6"
+                required
+                autofocus
+                placeholder="000000"
+                class="w-full px-4 py-3 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-center font-mono text-xl tracking-[0.3em] text-white placeholder-white/20 focus:outline-none focus:border-indigo-400 focus:bg-white/[0.12] transition"
+              />
+              <p class="text-[11px] text-white/60 text-center">
+                Code sent to <span class="font-semibold text-white">{{ otpIdentifier }}</span>
+              </p>
+            </div>
+
+            <button
+              type="submit"
+              :disabled="isLoading || otpCode.trim().length !== 6"
+              class="w-full py-2.5 px-4 bg-indigo-600 hover:bg-indigo-500 border border-indigo-400/40 disabled:opacity-50 text-white font-semibold text-sm rounded-xl backdrop-blur-md shadow-lg transition active:scale-[0.99] cursor-pointer flex items-center justify-center gap-2"
+            >
+              <LucideLoader2 v-if="isLoading" class="w-4 h-4 animate-spin" />
+              <span>{{ isLoading ? 'Verifying Code...' : 'Verify & Sign In' }}</span>
+            </button>
+
+            <!-- Resend Button with Countdown -->
+            <div class="text-center pt-1">
+              <button
+                v-if="otpCooldown <= 0"
+                type="button"
+                @click="handleSendOtp"
+                :disabled="isLoading"
+                class="text-xs text-indigo-300 hover:text-white transition cursor-pointer underline underline-offset-2"
+              >
+                Resend OTP code
+              </button>
+              <span v-else class="text-xs text-white/40">
+                Resend code in {{ otpCooldown }}s
+              </span>
+            </div>
+          </form>
+        </div>
 
         <!-- Divider -->
         <div class="flex items-center gap-3 my-1">
@@ -134,6 +249,7 @@ definePageMeta({
 const { fetchUser, user } = useAuth()
 const route = useRoute()
 
+const authMode = ref<'password' | 'otp'>('password')
 const identifier = ref("")
 const password = ref("")
 const isLoading = ref(false)
@@ -141,10 +257,17 @@ const isPasskeyLoading = ref(false)
 const errorMessage = ref("")
 const successMessage = ref("")
 
-// 2FA state
+// 2FA TOTP state
 const isTwoFactorStep = ref(false)
 const tempToken = ref("")
 const totpCode = ref("")
+
+// OTP Login state
+const otpIdentifier = ref("")
+const otpCode = ref("")
+const otpSent = ref(false)
+const otpCooldown = ref(0)
+let cooldownTimer: any = null
 
 onMounted(() => {
   if (route.query.passwordChanged) {
@@ -270,6 +393,65 @@ async function handlePasskeyLogin() {
     }
   } finally {
     isPasskeyLoading.value = false
+  }
+}
+
+async function handleSendOtp() {
+  if (!otpIdentifier.value.trim()) return
+  errorMessage.value = ""
+  successMessage.value = ""
+  isLoading.value = true
+
+  try {
+    const res = await $fetch<any>("/api/v1/auth/otp/send", {
+      method: "POST",
+      body: {
+        identifier: otpIdentifier.value.trim(),
+      },
+    })
+
+    otpSent.value = true
+    otpCooldown.value = res?.cooldownSeconds || 60
+    if (res?.otp) {
+      successMessage.value = `OTP code sent! (Dev code: ${res.otp})`
+    } else {
+      successMessage.value = `OTP code sent to ${otpIdentifier.value.trim()}`
+    }
+
+    if (cooldownTimer) clearInterval(cooldownTimer)
+    cooldownTimer = setInterval(() => {
+      if (otpCooldown.value > 0) {
+        otpCooldown.value--
+      } else {
+        clearInterval(cooldownTimer)
+      }
+    }, 1000)
+  } catch (err: any) {
+    errorMessage.value = err?.data?.statusMessage || err?.data?.message || "Failed to send OTP code"
+  } finally {
+    isLoading.value = false
+  }
+}
+
+async function handleVerifyOtp() {
+  if (!otpIdentifier.value.trim() || otpCode.value.trim().length !== 6) return
+  errorMessage.value = ""
+  isLoading.value = true
+
+  try {
+    await $fetch<any>("/api/v1/auth/otp/verify", {
+      method: "POST",
+      body: {
+        identifier: otpIdentifier.value.trim(),
+        code: otpCode.value.trim(),
+      },
+    })
+
+    await redirectAfterAuth()
+  } catch (err: any) {
+    errorMessage.value = err?.data?.statusMessage || err?.data?.message || "Invalid or expired OTP code"
+  } finally {
+    isLoading.value = false
   }
 }
 </script>

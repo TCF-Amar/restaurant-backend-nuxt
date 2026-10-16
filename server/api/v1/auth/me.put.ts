@@ -85,28 +85,43 @@ export default defineEventHandler(async (event) => {
     }
   }
 
-  const updatedUser = await prisma.user.update({
+  const currentUser = await prisma.user.findUnique({
     where: { id: claims.sub },
-    data: {
-      name: name.trim(),
-      email: cleanEmail,
-      phone: cleanPhone,
-      profile: {
-        upsert: {
-          create: {
-            phone: cleanPhone,
-          },
-          update: {
-            phone: cleanPhone,
-          },
-        },
+    select: { email: true, phone: true },
+  })
+
+  const emailChanged = cleanEmail && cleanEmail !== currentUser?.email
+  const phoneChanged = cleanPhone && cleanPhone !== currentUser?.phone
+
+  const updateData: any = {
+    name: name.trim(),
+    email: cleanEmail,
+    phone: cleanPhone,
+    profile: {
+      upsert: {
+        create: { phone: cleanPhone },
+        update: { phone: cleanPhone },
       },
     },
+  }
+
+  if (emailChanged) {
+    updateData.emailVerifiedAt = null
+  }
+  if (phoneChanged) {
+    updateData.phoneVerifiedAt = null
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: claims.sub },
+    data: updateData,
     select: {
       id: true,
       name: true,
       email: true,
       phone: true,
+      emailVerifiedAt: true,
+      phoneVerifiedAt: true,
       role: true,
       twoFactorEnabled: true,
       createdAt: true,

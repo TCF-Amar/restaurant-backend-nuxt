@@ -8,6 +8,34 @@
         <p class="text-xs text-white/65">Sign up to get started</p>
       </div>
 
+      <!-- Registration Mode Switcher -->
+      <div class="flex items-center p-1 rounded-xl bg-white/[0.04] border border-white/10 text-xs">
+        <button
+          type="button"
+          @click="registerMode = 'email'"
+          :class="[
+            'flex-1 py-1.5 rounded-lg font-semibold transition cursor-pointer text-center',
+            registerMode === 'email'
+              ? 'bg-indigo-600/40 text-white border border-indigo-500/50 shadow-sm'
+              : 'text-white/60 hover:text-white'
+          ]"
+        >
+          With Email
+        </button>
+        <button
+          type="button"
+          @click="registerMode = 'phone'"
+          :class="[
+            'flex-1 py-1.5 rounded-lg font-semibold transition cursor-pointer text-center',
+            registerMode === 'phone'
+              ? 'bg-indigo-600/40 text-white border border-indigo-500/50 shadow-sm'
+              : 'text-white/60 hover:text-white'
+          ]"
+        >
+          With Phone
+        </button>
+      </div>
+
       <form @submit.prevent="handleRegister" class="space-y-4">
         <!-- Error Message -->
         <div v-if="errorMessage"
@@ -22,10 +50,17 @@
             class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
         </div>
 
-        <!-- Email -->
-        <div class="space-y-1.5">
+        <!-- Email (if email mode) -->
+        <div v-if="registerMode === 'email'" class="space-y-1.5">
           <label class="block text-xs text-white/80 font-medium">Email Address</label>
           <input v-model="email" type="email" required placeholder="name@example.com"
+            class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
+        </div>
+
+        <!-- Phone (if phone mode) -->
+        <div v-else class="space-y-1.5">
+          <label class="block text-xs text-white/80 font-medium">Mobile Phone Number</label>
+          <input v-model="phone" type="tel" required placeholder="+15551234567"
             class="w-full px-4 py-2.5 bg-white/[0.08] backdrop-blur-md border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:border-white/50 focus:bg-white/[0.12] transition" />
         </div>
 
@@ -58,8 +93,10 @@ definePageMeta({
   layout: "auth",
 })
 
+const registerMode = ref<'email' | 'phone'>('email')
 const name = ref("")
 const email = ref("")
+const phone = ref("")
 const password = ref("")
 const isLoading = ref(false)
 const errorMessage = ref("")
@@ -68,12 +105,15 @@ async function handleRegister() {
   errorMessage.value = ""
   isLoading.value = true
 
+  const identifierToLogin = registerMode.value === 'email' ? email.value.trim() : phone.value.trim()
+
   try {
     await $fetch("/api/v1/auth/register", {
       method: "POST",
       body: {
         name: name.value,
-        email: email.value,
+        email: registerMode.value === 'email' ? email.value.trim() : undefined,
+        phone: registerMode.value === 'phone' ? phone.value.trim() : undefined,
         password: password.value,
       },
     })
@@ -82,7 +122,7 @@ async function handleRegister() {
     await $fetch("/api/v1/auth/login", {
       method: "POST",
       body: {
-        identifier: email.value,
+        identifier: identifierToLogin,
         password: password.value,
       },
     })
