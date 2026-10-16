@@ -28,11 +28,14 @@ export default defineEventHandler(async (event) => {
 
   const query = getQuery(event)
   const roleFilter = query.role ? String(query.role) : undefined
+  const statusFilter = query.status ? String(query.status) : undefined
   const search = query.search ? String(query.search).trim() : undefined
   const returnAll = query.all === "true" || query.all === "1"
 
   const where: Prisma.UserWhereInput = {
     ...(roleFilter && roleFilter !== "ALL" ? { role: roleFilter as any } : {}),
+    ...(statusFilter === "ACTIVE" ? { isSuspended: false } : {}),
+    ...(statusFilter === "SUSPENDED" ? { isSuspended: true } : {}),
     ...(search
       ? {
         OR: [

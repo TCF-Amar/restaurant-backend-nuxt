@@ -192,6 +192,22 @@ async function toggleSuspension() {
 async function updateRole() {
   if (!user.value || selectedRole.value === user.value.role) return
 
+  if (user.value.role === 'ADMIN') {
+    statusMessage.value = {
+      type: 'error',
+      text: 'Admin role is not changeable and cannot be modified.',
+    }
+    return
+  }
+
+  if (selectedRole.value === 'ADMIN') {
+    statusMessage.value = {
+      type: 'error',
+      text: 'Admins cannot assign the Admin role to any user.',
+    }
+    return
+  }
+
   isUpdatingRole.value = true
   isSubmitting.value = true
 

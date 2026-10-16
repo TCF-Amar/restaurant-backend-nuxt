@@ -6,13 +6,18 @@
       <div class="space-y-1.5">
         <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/15 border border-indigo-500/30 text-indigo-300 text-xs font-medium backdrop-blur-md">
           <LucideUsers class="w-3.5 h-3.5" />
-          <span>Identity & Access Management</span>
+          <span>{{ activeTab === 'customers' ? 'Customer Account Management' : activeTab === 'owners' ? 'Restaurant Partner Administration' : 'Global Platform Accounts' }}</span>
         </div>
         <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">
-          Users & Roles Directory
+          {{ activeTab === 'customers' ? 'Customer Management' : activeTab === 'owners' ? 'Restaurant Owners Directory' : 'All Platform Users' }}
         </h1>
         <p class="text-sm text-slate-300">
-          Audit user accounts, assign restaurant permissions, modify roles, and manage account suspensions.
+          {{ activeTab === 'customers'
+            ? 'Manage customer accounts, search profiles, view activity, and handle account suspensions.'
+            : activeTab === 'owners'
+              ? 'Manage restaurant owner accounts and review assigned restaurant outlets.'
+              : 'Audit and manage all accounts across all roles (Customers, Owners, Delivery Partners, and Admins).'
+          }}
         </p>
       </div>
 
@@ -27,18 +32,14 @@
     </div>
 
     <!-- Quick Metrics Strip -->
-    <div class="mt-6 pt-5 border-t border-white/[0.08] grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+    <div class="mt-6 pt-5 border-t border-white/[0.08] grid grid-cols-2 sm:grid-cols-3 gap-4 text-xs">
       <div>
-        <span class="text-slate-400">Total Users:</span>
-        <p class="text-lg font-bold text-white">{{ totalUsers }}</p>
+        <span class="text-slate-400">Total {{ activeTab === 'customers' ? 'Customers' : activeTab === 'owners' ? 'Owners' : 'Users' }}:</span>
+        <p class="text-lg font-bold text-white">{{ totalCount }}</p>
       </div>
       <div>
-        <span class="text-slate-400">Restaurant Owners:</span>
-        <p class="text-lg font-bold text-purple-300">{{ ownerCount }}</p>
-      </div>
-      <div>
-        <span class="text-slate-400">Administrators:</span>
-        <p class="text-lg font-bold text-indigo-300">{{ adminCount }}</p>
+        <span class="text-slate-400">Active Accounts:</span>
+        <p class="text-lg font-bold text-emerald-400">{{ activeCount }}</p>
       </div>
       <div>
         <span class="text-slate-400">Suspended Accounts:</span>
@@ -50,9 +51,9 @@
 
 <script setup lang="ts">
 defineProps<{
-  totalUsers: number
-  ownerCount: number
-  adminCount: number
+  activeTab: 'customers' | 'owners' | 'all'
+  totalCount: number
+  activeCount: number
   suspendedCount: number
   loading?: boolean
 }>()

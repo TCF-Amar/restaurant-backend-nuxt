@@ -31,9 +31,9 @@
             <!-- Role Badge -->
             <span
               :class="[
-                'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold border backdrop-blur-md',
+                'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold border backdrop-blur-md',
                 user.role === 'ADMIN'
-                  ? 'bg-indigo-500/15 text-indigo-300 border-indigo-500/30'
+                  ? 'bg-rose-500/15 text-rose-300 border-rose-500/30'
                   : user.role === 'RESTAURANT_OWNER'
                   ? 'bg-purple-500/15 text-purple-300 border-purple-500/30'
                   : user.role === 'DELIVERY_PARTNER'
@@ -42,7 +42,11 @@
               ]"
             >
               <LucideShield class="w-3 h-3" />
-              {{ formatRole(user.role) }}
+              <span>{{ formatRole(user.role) }}</span>
+              <span v-if="user.role === 'ADMIN'" class="inline-flex items-center gap-0.5 text-[10px] opacity-80 border-l border-rose-500/30 pl-1.5 ml-0.5">
+                <LucideLock class="w-2.5 h-2.5" />
+                Protected
+              </span>
             </span>
           </div>
 
