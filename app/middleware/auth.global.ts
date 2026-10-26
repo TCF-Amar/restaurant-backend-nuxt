@@ -1,4 +1,8 @@
 export default defineNuxtRouteMiddleware(async (to) => {
+  // Never intercept API routes or documentation
+  if (to.path.startsWith("/api") || to.path.startsWith("/docs") || to.path.startsWith("/swagger")) {
+    return
+  }
   const {
     user,
     initialized,

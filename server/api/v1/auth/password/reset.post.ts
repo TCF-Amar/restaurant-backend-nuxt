@@ -1,5 +1,6 @@
 import z from "zod"
 import bcrypt from "bcryptjs"
+import { getPasswordResetTokenUserId, invalidatePasswordResetToken } from "~~/server/utils/password-reset"
 
 defineRouteMeta({
   openAPI: {
@@ -73,8 +74,8 @@ export default defineEventHandler(async (event) => {
 
   const { resetToken, newPassword } = schema.parse(body)
 
-  // 1. Validate and consume single-use reset token in Redis
-  const userId = await consumePasswordResetToken(resetToken)
+  // 1. Validate reset token in Redis without consuming it yet
+  const userId = await getPasswordResetTokenUserId(resetToken)
   if (!userId) {
     throw createError({
       statusCode: 400,
@@ -95,7 +96,7 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // 3. Prevent setting the same password if user had one
+  // 3. Prevent setting the same password if user had one (token is NOT consumed if this fails)
   if (user.password) {
     const isSamePassword = await bcrypt.compare(newPassword, user.password)
     if (isSamePassword) {
@@ -113,7 +114,10 @@ export default defineEventHandler(async (event) => {
     data: { password: hashedPassword },
   })
 
-  // 5. Security best practice: Revoke ALL existing active sessions for this account
+  // 5. Invalidate single-use reset token now that password has been successfully updated
+  await invalidatePasswordResetToken(resetToken)
+
+  // 6. Security best practice: Revoke ALL existing active sessions for this account
   await revokeAllUserSessions(user.id)
   clearAuthCookies(event)
 

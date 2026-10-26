@@ -90,7 +90,18 @@ export default defineEventHandler(async (event) => {
     })
   }
 
-  // 1. If OTP provided, verify and consume OTP
+  // 1. Prevent reusing current password if user already has one (checked before OTP/credentials are consumed)
+  if (user.password) {
+    const isSamePassword = await bcrypt.compare(newPassword, user.password)
+    if (isSamePassword) {
+      throw createError({
+        statusCode: 400,
+        statusMessage: "New password cannot be the same as current password",
+      })
+    }
+  }
+
+  // 2. If OTP provided, verify and consume OTP
   if (otpCode) {
     const identifier = (user.email || user.phone || "").trim().toLowerCase()
     if (!identifier) {
@@ -108,7 +119,7 @@ export default defineEventHandler(async (event) => {
       })
     }
   } else if (user.password) {
-    // 2. Otherwise verify current password
+    // 3. Otherwise verify current password
     if (!currentPassword) {
       throw createError({
         statusCode: 400,
@@ -121,15 +132,6 @@ export default defineEventHandler(async (event) => {
       throw createError({
         statusCode: 400,
         statusMessage: "Incorrect current password",
-      })
-    }
-
-    // Prevent reusing current password
-    const isSamePassword = await bcrypt.compare(newPassword, user.password)
-    if (isSamePassword) {
-      throw createError({
-        statusCode: 400,
-        statusMessage: "New password cannot be the same as current password",
       })
     }
   }
